@@ -1,0 +1,47 @@
+2021-05-01 05:54:18.817 +08:00 [INF] MSBuild registered from C:\Program Files\dotnet\sdk\5.0.202\
+2021-05-01 05:54:18.968 +08:00 [INF] Registered 1 extensions:
+	Default extension
+2021-05-01 05:54:22.115 +08:00 [INF] Initializing upgrade step Select an entrypoint
+2021-05-01 05:54:22.120 +08:00 [INF] Setting entrypoint to only project in solution: C:\Users\Li Bozhao\source\repos\RichStrategy\RichStrategy\RichStrategy.csproj
+2021-05-01 05:54:22.128 +08:00 [INF] Initializing upgrade step Select project to upgrade
+2021-05-01 05:54:22.220 +08:00 [INF] Initializing upgrade step Back up project
+2021-05-01 05:55:09.192 +08:00 [INF] Skipping upgrade step Back up project
+2021-05-01 05:55:09.193 +08:00 [INF] Upgrade step Back up project skipped
+2021-05-01 05:55:13.470 +08:00 [INF] Initializing upgrade step Convert project file to SDK style
+2021-05-01 05:55:15.922 +08:00 [INF] Applying upgrade step Convert project file to SDK style
+2021-05-01 05:55:15.924 +08:00 [INF] Converting project file format with try-convert, version 0.7.217901
+2021-05-01 05:55:17.219 +08:00 [INF] [try-convert] C:\Users\Li Bozhao\source\repos\RichStrategy\RichStrategy\RichStrategy.csproj contains an App.config file. App.config is replaced by appsettings.json in .NET Core. You will need to delete App.config and migrate to appsettings.json if it's applicable to your project.
+2021-05-01 05:55:20.841 +08:00 [INF] [try-convert] Conversion complete!
+2021-05-01 05:55:21.274 +08:00 [INF] Project file converted successfully! The project may require additional changes to build successfully against the new .NET target.
+2021-05-01 05:55:24.263 +08:00 [INF] Upgrade step Convert project file to SDK style applied successfully
+2021-05-01 05:55:25.892 +08:00 [INF] Initializing upgrade step Clean up NuGet package references
+2021-05-01 05:55:28.310 +08:00 [INF] Reference to .NET Upgrade Assistant analyzer package (Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers, version 0.2.222702) needs added
+2021-05-01 05:55:28.317 +08:00 [INF] Packages to be added:
+Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers, Version=0.2.222702
+2021-05-01 05:55:31.393 +08:00 [INF] Applying upgrade step Clean up NuGet package references
+2021-05-01 05:55:31.400 +08:00 [INF] Adding package reference: Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers, Version=0.2.222702
+2021-05-01 05:55:34.913 +08:00 [INF] Upgrade step Clean up NuGet package references applied successfully
+2021-05-01 05:55:38.096 +08:00 [INF] Initializing upgrade step Update TFM
+2021-05-01 05:55:38.102 +08:00 [INF] TFM needs updated to net5.0-windows
+2021-05-01 05:55:40.975 +08:00 [INF] Applying upgrade step Update TFM
+2021-05-01 05:55:49.004 +08:00 [INF] Updated TFM to net5.0-windows
+2021-05-01 05:55:49.006 +08:00 [INF] Upgrade step Update TFM applied successfully
+2021-05-01 05:55:50.358 +08:00 [INF] Initializing upgrade step Update NuGet Packages
+2021-05-01 05:55:52.808 +08:00 [INF] Adding Microsoft.Windows.Compatibility 5.0.2
+2021-05-01 05:55:52.811 +08:00 [INF] Packages to be added:
+Microsoft.Windows.Compatibility, Version=5.0.2
+2021-05-01 05:55:57.577 +08:00 [INF] Applying upgrade step Update NuGet Packages
+2021-05-01 05:55:57.579 +08:00 [INF] Adding package reference: Microsoft.Windows.Compatibility, Version=5.0.2
+2021-05-01 05:56:07.873 +08:00 [INF] Marking package System.Data.DataSetExtensions for removal because it appears to be a transitive dependency
+2021-05-01 05:56:07.984 +08:00 [INF] Removing outdated package reference: System.Data.DataSetExtensions, Version=4.5.0
+2021-05-01 05:56:09.612 +08:00 [INF] Upgrade step Update NuGet Packages applied successfully
+2021-05-01 05:56:13.978 +08:00 [INF] Initializing upgrade step Add template files
+2021-05-01 05:56:14.028 +08:00 [INF] 0 expected template items needed
+2021-05-01 05:56:14.030 +08:00 [INF] Initializing upgrade step Upgrade app config files
+2021-05-01 05:56:14.065 +08:00 [INF] Found 0 app settings for upgrade: 
+2021-05-01 05:56:14.092 +08:00 [INF] Initializing upgrade step Update source code
+2021-05-01 05:56:15.638 +08:00 [INF] Initializing upgrade step Move to next project
+2021-05-01 05:56:31.270 +08:00 [INF] Skipping upgrade step Move to next project
+2021-05-01 05:56:31.272 +08:00 [INF] Upgrade step Move to next project skipped
+2021-05-01 05:56:33.171 +08:00 [INF] Upgrade has completed. Please review any changes.
+2021-05-01 05:56:33.173 +08:00 [INF] Saving upgrade progress file at C:\Users\Li Bozhao\source\repos\RichStrategy\.upgrade-assistant

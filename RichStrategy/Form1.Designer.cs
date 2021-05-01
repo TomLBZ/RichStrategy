@@ -62,9 +62,9 @@ namespace RichStrategy
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.btnTestData = new System.Windows.Forms.Button();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.graph1 = new RichStrategy.Graph();
-            this.btnTestData = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -328,6 +328,16 @@ namespace RichStrategy
             this.tabPage1.Text = "tabPage1";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
+            // btnTestData
+            // 
+            this.btnTestData.Location = new System.Drawing.Point(37, 31);
+            this.btnTestData.Name = "btnTestData";
+            this.btnTestData.Size = new System.Drawing.Size(83, 55);
+            this.btnTestData.TabIndex = 0;
+            this.btnTestData.Text = "TestData";
+            this.btnTestData.UseVisualStyleBackColor = true;
+            this.btnTestData.Click += new System.EventHandler(this.btnTestData_Click);
+            // 
             // tabPage2
             // 
             this.tabPage2.Location = new System.Drawing.Point(4, 24);
@@ -351,16 +361,6 @@ namespace RichStrategy
             this.graph1.TabIndex = 2;
             this.graph1.TabStop = false;
             // 
-            // btnTestData
-            // 
-            this.btnTestData.Location = new System.Drawing.Point(37, 31);
-            this.btnTestData.Name = "btnTestData";
-            this.btnTestData.Size = new System.Drawing.Size(83, 55);
-            this.btnTestData.TabIndex = 0;
-            this.btnTestData.Text = "TestData";
-            this.btnTestData.UseVisualStyleBackColor = true;
-            this.btnTestData.Click += new System.EventHandler(this.btnTestData_Click);
-            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -372,6 +372,7 @@ namespace RichStrategy
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.MinimumSize = new System.Drawing.Size(600, 400);
             this.Name = "frmMain";
             this.Text = "RichStrategy";
             this.menuStrip1.ResumeLayout(false);

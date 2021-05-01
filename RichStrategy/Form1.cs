@@ -20,7 +20,7 @@ namespace RichStrategy
             graph1.DataFrames = 1000;
         }
 
-        double starting_price = 100;
+        double starting_price = 1000;
         double volatility = 0.03;
         double daily_drift = 0.0008;
         private void btnTestData_Click(object sender, EventArgs e)

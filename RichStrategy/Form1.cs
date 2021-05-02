@@ -17,25 +17,36 @@ namespace RichStrategy
         {
             InitializeComponent();
             rnd = new Random();
-            graph1.DataFrames = 1000;
+            graph1.DataFrames = 5000;
         }
 
-        double starting_price = 1000;
-        double volatility = 0.03;
-        double daily_drift = 0.0008;
+        double starting_price = 57600;
+        double volatility = 0.0001020320726; // 30 days 3.00%, 1 day 0.547722575%, 1 hour 0.1118033989%, 5 minute 0.03227486122%, 30 seconds 0.01020320736%
+        double daily_drift = 0;
         private void btnTestData_Click(object sender, EventArgs e)
         {
             List<double> data = new List<double>();
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < 5000; i++)
             {
-                double norm_inversed = NormalDistribution.NormInv(rnd.NextGaussian(), 0, volatility);
-                while (double.IsInfinity(norm_inversed)) norm_inversed = NormalDistribution.NormInv(rnd.NextGaussian(), 0, volatility);
-                double new_price = starting_price * (1 + norm_inversed + daily_drift);
+                double dRtn = rnd.NextGaussian(0, volatility);
+                //double norm_inversed = NormalDistribution.NormInv(rnd.NextGaussian(), 0, volatility);
+                //while (double.IsInfinity(norm_inversed)) norm_inversed = NormalDistribution.NormInv(rnd.NextGaussian(), 0, volatility);
+                double new_price = starting_price * (1 + dRtn + daily_drift);
                 data.Add(new_price);
                 starting_price = new_price;
             }
             graph1.Data = data.ToArray();
             graph1.Redraw();
+        }
+        protected override void OnMouseWheel(MouseEventArgs e)
+        {
+            if (e.X >= graph1.Location.X && e.X <= graph1.Location.X + graph1.Width
+            &&
+            e.Y >= graph1.Location.Y && e.Y <= graph1.Location.Y + graph1.Height)
+            {
+                graph1.OnMouseWheel(e);
+            }
+            base.OnMouseWheel(e);
         }
     }
 }

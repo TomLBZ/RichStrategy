@@ -35,6 +35,21 @@ namespace RichStrategy
             }
         }
 
+        private struct Candle
+        {
+            public double OpenPrice;
+            public double ClosePrice;
+            public double MaxPrice;
+            public double MinPrice;
+            public Candle(double open, double close, double max, double min)
+            {
+                OpenPrice = open;
+                ClosePrice = close;
+                MinPrice = min;
+                MaxPrice = max;
+            }
+        }
+
         #endregion
 
         #region Properties
@@ -46,6 +61,10 @@ namespace RichStrategy
         #endregion
         public Graph()
         {
+            MouseMove += new MouseEventHandler(Graph_MouseMove);
+            MouseLeave += new EventHandler(Graph_MouseLeave);
+            MouseDown += new MouseEventHandler(Graph_MouseDown);
+            MouseUp += new MouseEventHandler(Graph_MouseUp);
             DoubleBuffered = true;
             Settings = new GraphSettings(Color.Black, Color.Green, Color.DarkGray, Color.LightBlue, Color.DarkMagenta, Color.Red, Color.LimeGreen);
             DataIntervalSeconds = 30;
@@ -53,9 +72,69 @@ namespace RichStrategy
             CandleCompoundCount = 10; // 30 second -> 5 minutes
             Redraw();
         }
+        bool RIGHT_BTN_DOWN = false;
+        private void Graph_MouseDown(object sender, MouseEventArgs e)
+        {
+            RIGHT_BTN_DOWN = e.Button == MouseButtons.Right;
+        }
+        private void Graph_MouseUp(object sender, MouseEventArgs e)
+        {
+            RIGHT_BTN_DOWN = e.Button != MouseButtons.Right;
+        }
+        public new void OnMouseWheel(MouseEventArgs e)
+        {
+            if (!RIGHT_BTN_DOWN)
+            {
+                DataFrames += e.Delta;
+                int lowerLimit = Math.Min(120, CandleCompoundCount * 10);
+                if (Data is not null && DataFrames > Data.Length) DataFrames = Data.Length;
+                if (DataFrames < lowerLimit) DataFrames = lowerLimit;
+            }
+            else
+            {
+                CandleCompoundCount += e.Delta / 60;
+                if (Data is not null && CandleCompoundCount > Data.Length / 10) CandleCompoundCount = Data.Length / 10;
+                if (CandleCompoundCount < 10) CandleCompoundCount = 10;
+            }
+            Redraw();
+            base.OnMouseWheel(e);
+        }
+        private void Graph_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (Image is null) Image = new Bitmap(Width, Height);
+            using(Graphics g = Graphics.FromImage(Image))
+            {
+                g.Clear(Color.Transparent);
+                DrawLabels(g);
+                Pen gridPen = new Pen(Settings.gGridColor, 0.001f);
+                g.DrawLine(gridPen, 0, e.Y, Width, e.Y);
+                g.DrawLine(gridPen, e.X, 0, e.X, Height);
+                float fracDown = (float)e.Y / Height;
+                float valueY = (float)(shiftV - 2 * diff * fracDown);
+                SolidBrush labelBrush = new SolidBrush(Settings.gLabelColor);
+                g.DrawString(valueY.ToString(), DefaultFont, labelBrush, 0, e.Y);
+            }
+            Refresh();
+        }
+        private void Graph_MouseLeave(object sender, EventArgs e)
+        {
+            if (Image is null) Image = new Bitmap(Width, Height);
+            using (Graphics g = Graphics.FromImage(Image))
+            {
+                g.Clear(Color.Transparent);
+                DrawLabels(g);
+            }
+            Refresh();
+        }
         protected override void OnSizeChanged(EventArgs e)
         {
             base.OnSizeChanged(e);
+            if (BackgroundImage.Width != Width || BackgroundImage.Height != Height)
+            {
+                Image img = BackgroundImage;
+                BackgroundImage = null;
+                img.Dispose();
+            }
             if (Image.Width != Width || Image.Height != Height)
             {
                 Image img = Image;
@@ -104,7 +183,8 @@ namespace RichStrategy
         {
             UpdateData();
             if (Image is null) Image = new Bitmap(Width, Height);
-            using (Graphics g = Graphics.FromImage(Image))
+            if (BackgroundImage is null) BackgroundImage = new Bitmap(Width, Height);
+            using (Graphics g = Graphics.FromImage(BackgroundImage))
             {
                 g.Clear(Settings.gBackColor);
                 if (dataMax > dataMin && dataMin >= 0 && frameH > 0)
@@ -115,10 +195,14 @@ namespace RichStrategy
                     DrawData(g);
                     DrawCandles(g);
                     DrawIndicators(g);
-                    DrawLabels(g);
                 }
-                Refresh();
             }
+            using (Graphics g = Graphics.FromImage(Image))
+            {
+                g.Clear(Color.Transparent);
+                DrawLabels(g);
+            }
+            Refresh();
         }
         private void DrawCanvas(Graphics g)
         {
@@ -137,6 +221,7 @@ namespace RichStrategy
             Color transparentRawDataColor = Color.FromArgb(128, Settings.gRawDataColor);
             g.DrawLines(new Pen(transparentRawDataColor, 0.001f), framedData.ToArray());
         }
+        private Candle[] candles;
         private void DrawCandles(Graphics g)
         {
             Color bullColor = Color.FromArgb(128, Settings.gCandleBullColor);
@@ -146,10 +231,12 @@ namespace RichStrategy
             double candleOpen = double.PositiveInfinity;
             double candleClose = double.PositiveInfinity;
             int startPosition = dataStartIndex;
+            List<Candle> candles_data = new List<Candle>();
+            int initialMod = dataStartIndex % CandleCompoundCount;
             for (int i = dataStartIndex; i < Data.Length; i++)
             {
                 int mod = i % CandleCompoundCount;
-                if (mod == 0)
+                if (mod == initialMod)
                 {
                     candleOpen = Data[i];
                     candleMin = candleOpen;
@@ -168,24 +255,31 @@ namespace RichStrategy
                         g.FillRectangle(new SolidBrush(color), startPosition, cBottom, CandleCompoundCount, (float)Math.Abs(candleOpen - candleClose));
                         g.DrawLine(new Pen(color), tailLinePos, (float)candleMin, tailLinePos, (float)candleMax);
                         startPosition += CandleCompoundCount;
+                        candles_data.Add(new Candle(candleOpen, candleClose, candleMax, candleMin));
                     }
                 }
             }
+            candles = candles_data.ToArray();
         }
         private void DrawIndicators(Graphics g)
         {
+            if (candles is null) return;
             Color bullColor = Color.FromArgb(128, Settings.gCandleBullColor);
             Color bearColor = Color.FromArgb(128, Settings.gCandleBearColor);
 
         }
         private void DrawLabels(Graphics g)
         {
-            g.ScaleTransform(1, -1);
             SolidBrush labelBrush = new SolidBrush(Settings.gLabelColor);
-            g.DrawString(shiftV.ToString(), DefaultFont, labelBrush, dataStartIndex, -(float)(shiftV));
-            g.DrawString((shiftV - diff).ToString(), DefaultFont, labelBrush, dataStartIndex, -(float)(shiftV - diff));
+            g.DrawString(shiftV.ToString("C"), DefaultFont, labelBrush, 0, 0);
+            g.DrawString((shiftV - diff).ToString("C"), DefaultFont, labelBrush, 0, (float)(Height / 2f));
             float strHeight = g.MeasureString(shiftV.ToString(), DefaultFont).Height;
-            g.DrawString((shiftV - 2 * diff).ToString(), DefaultFont, labelBrush, dataStartIndex, -(float)(shiftV - 2 * diff + strHeight));
+            g.DrawString((shiftV - 2 * diff).ToString("C"), DefaultFont, labelBrush, 0, (float)(Height - strHeight));
+            int candleSeconds = CandleCompoundCount * DataIntervalSeconds;
+            string str = "Data Interval: " + DataIntervalSeconds.ToString() + "s; Data Frame: " + DataFrames.ToString() + " samples; Candle Interval: "
+                + candleSeconds.ToString() + "s = " + (candleSeconds / 60).ToString() + " min = " + (candleSeconds / 3600).ToString() + " hrs.";
+            float strWidth = g.MeasureString(str, DefaultFont).Width;
+            g.DrawString(str, DefaultFont, labelBrush, (Width - strWidth) / 2f, 0);
         }
     }
 }

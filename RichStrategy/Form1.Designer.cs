@@ -350,6 +350,8 @@ namespace RichStrategy
             // 
             // graph1
             // 
+            this.graph1.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("graph1.BackgroundImage")));
+            this.graph1.CandleCompoundCount = 10;
             this.graph1.Data = null;
             this.graph1.DataFrames = 500;
             this.graph1.DataIntervalSeconds = 30;

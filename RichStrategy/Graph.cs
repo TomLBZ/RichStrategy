@@ -23,7 +23,10 @@ namespace RichStrategy
             public Color gRawDataColor;
             public Color gCandleBullColor;
             public Color gCandleBearColor;
-            public GraphSettings(Color backColor, Color axisColor, Color gridColor, Color labelColor, Color rawDataColor, Color candleBullColor, Color candleBearColor)
+            public Color gTrendTopTurningColor;
+            public Color gTrendBottomTurningColor;
+            public GraphSettings(Color backColor, Color axisColor, Color gridColor, Color labelColor, Color rawDataColor, Color candleBullColor, Color candleBearColor,
+                Color trendTopTurningColor, Color trendBottomTurningColor)
             {
                 gBackColor = backColor;
                 gAxisColor = axisColor;
@@ -32,6 +35,8 @@ namespace RichStrategy
                 gRawDataColor = rawDataColor;
                 gCandleBullColor = candleBullColor;
                 gCandleBearColor = candleBearColor;
+                gTrendTopTurningColor = trendTopTurningColor;
+                gTrendBottomTurningColor = trendBottomTurningColor;
             }
         }
 
@@ -66,7 +71,7 @@ namespace RichStrategy
             MouseDown += new MouseEventHandler(Graph_MouseDown);
             MouseUp += new MouseEventHandler(Graph_MouseUp);
             DoubleBuffered = true;
-            Settings = new GraphSettings(Color.Black, Color.Green, Color.DarkGray, Color.LightBlue, Color.DarkMagenta, Color.Red, Color.LimeGreen);
+            Settings = new GraphSettings(Color.Black, Color.Green, Color.DarkGray, Color.LightBlue, Color.DarkMagenta, Color.Red, Color.LimeGreen, Color.HotPink, Color.LightSeaGreen);
             DataIntervalSeconds = 30;
             DataFrames = 500;
             CandleCompoundCount = 10; // 30 second -> 5 minutes
@@ -194,6 +199,7 @@ namespace RichStrategy
                     DrawCanvas(g);
                     DrawData(g);
                     DrawCandles(g);
+                    DrawTrends(g);
                     DrawIndicators(g);
                 }
             }
@@ -261,6 +267,100 @@ namespace RichStrategy
             }
             candles = candles_data.ToArray();
         }
+        private void DrawTrends(Graphics g)
+        {
+            int data_trigger = Math.Max(5, DataFrames / CandleCompoundCount / 100); // 50 sections or 10 candles
+            double tmin = double.PositiveInfinity, tmax = double.NegativeInfinity;
+            int accumax = 0, accumin = 0;
+            int index = dataStartIndex, maxindex = dataStartIndex, minindex = dataStartIndex;
+            List<PointF> turns = new List<PointF>();
+            List<PointF> topturns = new List<PointF>();
+            List<PointF> bottomturns = new List<PointF>();
+            foreach (Candle c in candles)
+            {
+                if (c.MaxPrice < tmax) accumax++;
+                else { tmax = c.MaxPrice; maxindex = index; accumax = 0; }
+                if(accumax > data_trigger)
+                {
+                    accumax = 0;
+                    PointF ptfTop = new PointF(maxindex, (float)tmax);
+                    turns.Add(ptfTop);
+                    topturns.Add(ptfTop);
+                    tmax = double.NegativeInfinity;
+                }
+                if (c.MinPrice > tmin) accumin++;
+                else { tmin = c.MinPrice; minindex = index; accumin = 0; }
+                if (accumin > data_trigger)
+                {
+                    accumin = 0;
+                    PointF ptfBtm = new PointF(minindex, (float)tmin);
+                    turns.Add(ptfBtm);
+                    bottomturns.Add(ptfBtm);
+                    tmin = double.PositiveInfinity;
+                }
+                index += CandleCompoundCount;
+            }
+            if (tmax != double.NegativeInfinity)
+            {
+                PointF ptf = new PointF(maxindex, (float)tmax);
+                if (!turns.Contains(ptf)) { turns.Add(ptf); topturns.Add(ptf); }
+            }
+            if (tmin != double.PositiveInfinity)
+            {
+                PointF ptf = new PointF(minindex, (float)tmin);
+                if (!turns.Contains(ptf)) { turns.Add(ptf); bottomturns.Add(ptf); }
+            }
+            Color topTurningColor = Color.FromArgb(192, Settings.gTrendTopTurningColor);
+            Color bottomTurningColor = Color.FromArgb(192, Settings.gTrendBottomTurningColor);
+            foreach (PointF ptF in topturns) g.FillEllipse(new SolidBrush(topTurningColor), ptF.X, ptF.Y, CandleCompoundCount, CandleCompoundCount);
+            foreach (PointF ptF in bottomturns) g.FillEllipse(new SolidBrush(bottomTurningColor), ptF.X, ptF.Y, CandleCompoundCount, CandleCompoundCount);
+            PointF ptfMax = turns[0];
+            PointF ptfMin = turns[0];
+            PointF ptfUpMinBuffer = turns[0];
+            PointF ptfDownMaxBuffer = turns[0];
+            int trendState = 0; // -1: down; 0: unclear; 1: up
+            List<RectangleF> upTrends = new List<RectangleF>();
+            List<RectangleF> downTrends = new List<RectangleF>();
+            foreach (PointF ptf in turns)
+            {
+                if (ptf.Y >= ptfMax.Y) // up trend initiate
+                {
+                    ptfMax = ptf;
+                    trendState = 1;
+                }
+                else if (ptf.Y < ptfMax.Y && ptf.Y >= ptfUpMinBuffer.Y) // up trend correction
+                {
+                    ptfUpMinBuffer = ptf;
+                }
+                else if (ptf.Y < ptfUpMinBuffer.Y && ptf.Y > ptfDownMaxBuffer.Y) // trend reversal
+                {
+                    ptfUpMinBuffer = ptf;
+                    ptfDownMaxBuffer = ptf;
+                    if (trendState == 1) upTrends.Add(new RectangleF(ptfMin.X, ptfMin.Y, Math.Abs(ptf.X - ptfMin.X), Math.Abs(ptfMax.Y - ptfMin.Y)));
+                    else if (trendState == -1) downTrends.Add(new RectangleF(ptfMax.X, ptfMin.Y, Math.Abs(ptfMax.X - ptf.X), Math.Abs(ptfMax.Y - ptfMin.Y)));
+                    ptfMin = ptfMax = ptf;
+                    trendState = 0;
+                }
+                else if (ptf.Y <= ptfDownMaxBuffer.Y && ptf.Y > ptfMin.Y) // down trend correction
+                {
+                    ptfDownMaxBuffer = ptf;
+                }
+                else if (ptf.Y <= ptfMin.Y) // down trend initiate
+                {
+                    ptfMin = ptf;
+                    trendState = -1;
+                }
+            }
+            if (trendState != 0)
+            {
+                if (trendState == 1) upTrends.Add(new RectangleF(ptfMin.X, ptfMin.Y, Math.Abs(turns.Last().X - ptfMin.X), Math.Abs(ptfMax.Y - ptfMin.Y)));
+                else if (trendState == -1) downTrends.Add(new RectangleF(ptfMax.X, ptfMin.Y, Math.Abs(ptfMax.X - turns.Last().X), Math.Abs(ptfMax.Y - ptfMin.Y)));
+            }
+            Color bullColor = Color.FromArgb(48, Settings.gCandleBullColor);
+            Color bearColor = Color.FromArgb(48, Settings.gCandleBearColor);
+            foreach (RectangleF rectf in upTrends) g.FillRectangle(new SolidBrush(bullColor), rectf);
+            foreach (RectangleF rectf in downTrends) g.FillRectangle(new SolidBrush(bearColor), rectf);
+        }
         private void DrawIndicators(Graphics g)
         {
             if (candles is null) return;
@@ -276,8 +376,8 @@ namespace RichStrategy
             float strHeight = g.MeasureString(shiftV.ToString(), DefaultFont).Height;
             g.DrawString((shiftV - 2 * diff).ToString("C"), DefaultFont, labelBrush, 0, (float)(Height - strHeight));
             int candleSeconds = CandleCompoundCount * DataIntervalSeconds;
-            string str = "Data Interval: " + DataIntervalSeconds.ToString() + "s; Data Frame: " + DataFrames.ToString() + " samples; Candle Interval: "
-                + candleSeconds.ToString() + "s = " + (candleSeconds / 60).ToString() + " min = " + (candleSeconds / 3600).ToString() + " hrs.";
+            string str = "Data Interval: " + DataIntervalSeconds.ToString() + "s; Data Frame: " + DataFrames.ToString() + " samples = " + (DataFrames / 2).ToString()
+                + "min; Candle Interval: " + candleSeconds.ToString() + "s = " + (candleSeconds / 60).ToString() + " min = " + (candleSeconds / 3600).ToString() + " hrs.";
             float strWidth = g.MeasureString(str, DefaultFont).Width;
             g.DrawString(str, DefaultFont, labelBrush, (Width - strWidth) / 2f, 0);
         }

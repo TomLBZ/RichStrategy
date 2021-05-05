@@ -4,6 +4,7 @@ from flask_cors import CORS, cross_origin
 import sys
 import os
 import json
+from core.Scheduler import Scheduler
 
 abs_join = lambda p1, p2 : os.path.abspath(os.path.join(p1, p2))
 SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -16,11 +17,15 @@ config = {
     "port": 8012
 }
 
+scheduler = Scheduler()
+
 def main():
     # update config
     print("\n\n      Rich Server\n\n")
     print("# Configuration:")
     print(json.dumps(config, indent=2))
+
+    scheduler.start()
 
     # running the server
     print("Api running on port : {} ".format(config["port"]))

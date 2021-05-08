@@ -34,7 +34,13 @@ class Scheduler():
             print("\n# [scheduler-thread] Querying data ... ", total_t)
             for key in gateapi.TRADE_SETTINGS:
                 data = gateapi.get_api(gateapi.API2_TICKER(key))
-                print(data)
+                print("# status(ticker):", data)
+                data = gateapi.get_api(gateapi.API2_ORDERBOOK(key))
+                print("# depth(orderbook):", len(data))
+                data = gateapi.get_api(gateapi.API2_TRADEHISTORY(key))
+                print("# tradehistory:", len(data))
+                data = gateapi.get_api(gateapi.API2_CANDLE(key, 60, 1)) # 1 minute candle for 1 hour
+                print("# candle:", len(data))
             
             time.sleep(DELTA_T)
             total_t += DELTA_T

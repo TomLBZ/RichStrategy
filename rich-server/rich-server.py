@@ -19,18 +19,6 @@ config = {
 
 scheduler = Scheduler()
 
-def main():
-    # update config
-    print("\n\n      Rich Server\n\n")
-    print("# Configuration:")
-    print(json.dumps(config, indent=2))
-
-    scheduler.start()
-
-    # running the server
-    print("Api running on port : {} ".format(config["port"]))
-    app.run(host="0.0.0.0", port=config["port"], debug=True)
-
 
 @app.route('/')
 @cross_origin()
@@ -50,6 +38,21 @@ def api_posttest():
 def api_status():
     return {"status": "hahaha"}
 
+
+###################################################
+
+def main():
+    # update config
+    print("\n\n      Rich Server\n\n")
+    print("# Configuration:")
+    print(json.dumps(config, indent=2))
+
+    # running the server
+    print("Api running on port : {} ".format(config["port"]))
+
+    scheduler.start()
+    app.run(host="0.0.0.0", port=config["port"], debug=True)
+    scheduler.wait()
 
 if __name__ == "__main__":
     main()

@@ -10,6 +10,10 @@
     <ApplicationIcon>QQ截图20120504203117 - 副本.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Configuration.cs" />
+    <Compile Remove="Futures.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="Io.Gate.GateApi">
       <HintPath>..\..\gateapi-csharp\src\Io.Gate.GateApi\bin\Release\netstandard2.0\Io.Gate.GateApi.dll</HintPath>
       <EmbedInteropTypes>False</EmbedInteropTypes>

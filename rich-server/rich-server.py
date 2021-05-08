@@ -48,11 +48,15 @@ def main():
     print(json.dumps(config, indent=2))
 
     # running the server
-    print("Api running on port : {} ".format(config["port"]))
+    print("# Api running on port : {} ".format(config["port"]))
 
     scheduler.start()
-    app.run(host="0.0.0.0", port=config["port"], debug=True)
-    scheduler.wait()
+    
+    # https://stackoverflow.com/questions/28585033/why-does-a-flask-app-create-two-process
+    app.run(host="0.0.0.0", port=config["port"], debug=True, use_reloader=False)
+
+    print("# Api stops running.")
+    scheduler.stop()
 
 if __name__ == "__main__":
     main()

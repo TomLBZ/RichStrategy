@@ -33,7 +33,7 @@ namespace RichStrategy
             throw new NotImplementedException();
         }
 
-        public double FetchHistoricalVolume()
+        public double[] FetchHistoricalVolume(int seconds)
         {
             throw new NotImplementedException();
         }

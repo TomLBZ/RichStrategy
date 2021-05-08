@@ -13,6 +13,6 @@ namespace RichStrategy
         public double FetchCurrentPrice();
         public double[] FetchHistoricalPrice(int seconds);
         public double FetchCurrentVolume();
-        public double FetchHistoricalVolume();
+        public double[] FetchHistoricalVolume(int seconds);
     }
 }

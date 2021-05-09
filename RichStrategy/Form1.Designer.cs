@@ -62,6 +62,8 @@ namespace RichStrategy
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.txtTestOutput = new System.Windows.Forms.TextBox();
+            this.btnTestAPI = new System.Windows.Forms.Button();
             this.btnTestData = new System.Windows.Forms.Button();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.graph1 = new RichStrategy.Graph();
@@ -319,6 +321,8 @@ namespace RichStrategy
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.txtTestOutput);
+            this.tabPage1.Controls.Add(this.btnTestAPI);
             this.tabPage1.Controls.Add(this.btnTestData);
             this.tabPage1.Location = new System.Drawing.Point(4, 24);
             this.tabPage1.Name = "tabPage1";
@@ -328,11 +332,34 @@ namespace RichStrategy
             this.tabPage1.Text = "tabPage1";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
+            // txtTestOutput
+            // 
+            this.txtTestOutput.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtTestOutput.Location = new System.Drawing.Point(3, 64);
+            this.txtTestOutput.Multiline = true;
+            this.txtTestOutput.Name = "txtTestOutput";
+            this.txtTestOutput.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.txtTestOutput.Size = new System.Drawing.Size(191, 551);
+            this.txtTestOutput.TabIndex = 2;
+            // 
+            // btnTestAPI
+            // 
+            this.btnTestAPI.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnTestAPI.Location = new System.Drawing.Point(99, 3);
+            this.btnTestAPI.Name = "btnTestAPI";
+            this.btnTestAPI.Size = new System.Drawing.Size(95, 55);
+            this.btnTestAPI.TabIndex = 1;
+            this.btnTestAPI.Text = "Test API";
+            this.btnTestAPI.UseVisualStyleBackColor = true;
+            this.btnTestAPI.Click += new System.EventHandler(this.btnTestAPI_Click);
+            // 
             // btnTestData
             // 
-            this.btnTestData.Location = new System.Drawing.Point(37, 31);
+            this.btnTestData.Location = new System.Drawing.Point(3, 3);
             this.btnTestData.Name = "btnTestData";
-            this.btnTestData.Size = new System.Drawing.Size(83, 55);
+            this.btnTestData.Size = new System.Drawing.Size(95, 55);
             this.btnTestData.TabIndex = 0;
             this.btnTestData.Text = "TestData";
             this.btnTestData.UseVisualStyleBackColor = true;
@@ -381,6 +408,7 @@ namespace RichStrategy
             this.menuStrip1.PerformLayout();
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
+            this.tabPage1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.graph1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -424,6 +452,8 @@ namespace RichStrategy
         private System.Windows.Forms.TabPage tabPage2;
         private Graph graph1;
         private System.Windows.Forms.Button btnTestData;
+        private System.Windows.Forms.TextBox txtTestOutput;
+        private System.Windows.Forms.Button btnTestAPI;
     }
 }
 

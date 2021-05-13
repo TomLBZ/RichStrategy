@@ -5,7 +5,6 @@ class TradeLog:
     def __init__(self, log_file, order_extract_func):
         self.log_file = log_file
         self.order_extract_func = order_extract_func
-        self.data = []
         self.ordered_data = {}
         self.largest_order = None
         self._init_from_file()
@@ -17,22 +16,31 @@ class TradeLog:
             self.ordered_data = {self.order_extract_func(x) for x in self.data}
             self.largest_order = self.order_extract_func(self.data[-1])
             print("# [TraceLog] init from:", self.log_file)
+        else:
+            logdir = os.path.dirname(self.log_file)
+            if not os.path.exists(logdir):
+                print("# [TraceLog] create directory", logdir)
+                os.makedirs(logdir)
 
 
     def  _append_single(self, order_idx, entry):
-        assert(order_idx > self.largest_order)
-        self.data.append([order_idx, entry])
+        order_idx = int(order_idx)
+        assert(self.largest_order is None or order_idx > self.largest_order)
+        
         self.ordered_data[order_idx] = entry
         self.largest_order = order_idx
+    
 
     def _append_multiple(self, entries):
         for entry in entries:
             order_idx = self.order_extract_func(entry)
+            order_idx = int(order_idx)
             if order_idx not in self.ordered_data:
-                assert(order_idx > self.largest_order)
-                self.data.append([order_idx, entry])
+                assert(self.largest_order is None or order_idx > self.largest_order)
                 self.ordered_data[order_idx] = entry
                 self.larget_order = order_idx
+            # if history data, TODO: check data equal
+
         
 
 class TradeLogCandle(TradeLog):

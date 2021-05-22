@@ -9,8 +9,6 @@ using System.Collections;
 
 namespace RichStrategy
 {
-
-
     public partial class Graph : PictureBox
     {
         #region structs

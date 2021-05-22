@@ -13,30 +13,11 @@ namespace RichStrategy
         ALLOWSELL,
         DISALLOW
     }
-    public enum Timeframes
-    {
-        TF_10S,
-        TF_30S,
-        TF_1M,
-        TF_5M,
-        TF_15M,
-        TF_30M,
-        TF_1H,
-        TF_2H,
-        TF_4H,
-        TF_8H,
-        TF_12H,
-        TF_1D,
-        TF_2D,
-        TF_7D,
-        TF_14D,
-        TF_30D
-    }
     #endregion
     public class DataAnalyzer
     {
         #region Properties
-        public Timeframes TimeFrame { get; set; }
+        public Strategy.TIMEFRAME TimeFrame { get; set; }
         public double[] RawPriceData { get; set; }
         public double[] RawVolumeData { get; set; }
         #endregion

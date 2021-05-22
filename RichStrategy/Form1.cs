@@ -13,12 +13,12 @@ namespace RichStrategy
     public partial class frmMain : Form
     {
         Random rnd;
-        GateIO gateIO;
+        //GateIO gateIO;
         public frmMain()
         {
             InitializeComponent();
             rnd = new Random();
-            gateIO = new GateIO();
+            //gateIO = new GateIO();
             graph1.DataFrames = 5000;
         }
 
@@ -66,7 +66,8 @@ namespace RichStrategy
 
         private void btnTestAPI_Click(object sender, EventArgs e)
         {
-            if (!gateIO.Connect()) throw new Exception();
+            API.GateIO.TestAPI("82cac15cbe518008df484e9a5ad330b7",
+            "7b92fc112e895d9f509ac8fec4bf392e3acc49065692cd4ba497cb70d71e0880");
         }
     }
 }

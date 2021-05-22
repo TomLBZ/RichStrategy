@@ -8,61 +8,23 @@ using Io.Gate.GateApi.Api;
 using Io.Gate.GateApi.Client;
 using Io.Gate.GateApi.Model;
 
-namespace RichStrategy
+namespace RichStrategy.API
 {
-    public class GateIO : PlatformDataInterface
+    public static class GateIO
     {
-        public bool Connect()
+        public static void TestAPI(string key, string secret)
         {
             Configuration config = new Configuration();
             config.BasePath = "https://api.gateio.ws/api/v4";
-            config.ApiV4Key = "your_key";
-            config.ApiV4Secret = "your_secret";
+            config.ApiV4Key = key;
+            config.ApiV4Secret = secret;
             FuturesApi fa = new FuturesApi(config);
             const string settle = "btc";  // string | Settle currency
             const string contract = "BTC_USD";
             const string leverage = "10";
-            fa.UpdatePositionLeverage(settle, contract, leverage);
-            long positionSize = 0L;
-            try
-            {
-                Position position = fa.GetPosition(settle, contract);
-                positionSize = position.Size;
-            }
-            catch (GateApiException e)
-            {
-                // ignore no position error 
-                if (!"POSITION_NOT_FOUND".Equals(e.ErrorLabel))
-                {
-                    return false;
-                }
-            }
-            return true;
+            List<FuturesCandlestick> candles = fa.ListFuturesCandlesticks(settle, contract);
+            System.Windows.Forms.MessageBox.Show(candles.Last().ToJson());
         }
 
-        public void Disconnect()
-        {
-            throw new NotImplementedException();
-        }
-
-        public double FetchCurrentPrice()
-        {
-            throw new NotImplementedException();
-        }
-
-        public double FetchCurrentVolume()
-        {
-            throw new NotImplementedException();
-        }
-
-        public double[] FetchHistoricalPrice(int seconds)
-        {
-            throw new NotImplementedException();
-        }
-
-        public double[] FetchHistoricalVolume(int seconds)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

@@ -2,6 +2,9 @@ import math
 import json
 import os
 
+abs_join = lambda p1, p2 : os.path.abspath(os.path.join(p1, p2))
+SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
+
 # read value to a dict by keys path
 def dict_keys_write(mydict, keys, value):
     assert(len(keys) > 0)

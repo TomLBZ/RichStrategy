@@ -12,7 +12,8 @@ namespace RichStrategy.API
 {
     public static class GateIO
     {
-        public static void TestAPI(string key, string secret)
+        public static List<string> GetCandlesFromGateIO(
+            string key, string secret)
         {
             Configuration config = new Configuration();
             config.BasePath = "https://api.gateio.ws/api/v4";
@@ -23,7 +24,12 @@ namespace RichStrategy.API
             const string contract = "BTC_USD";
             const string leverage = "10";
             List<FuturesCandlestick> candles = fa.ListFuturesCandlesticks(settle, contract);
-            System.Windows.Forms.MessageBox.Show(candles.Last().ToJson());
+            List<string> candleJsons = new();
+            foreach (FuturesCandlestick fcs in candles)
+            {
+                candleJsons.Add(fcs.ToJson());
+            }
+            return candleJsons;
         }
 
     }

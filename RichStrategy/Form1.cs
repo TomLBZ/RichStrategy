@@ -66,8 +66,14 @@ namespace RichStrategy
 
         private void btnTestAPI_Click(object sender, EventArgs e)
         {
-            API.GateIO.TestAPI("82cac15cbe518008df484e9a5ad330b7",
-            "7b92fc112e895d9f509ac8fec4bf392e3acc49065692cd4ba497cb70d71e0880");
+            List<string> candleJsons = API.GateIO.GetCandlesFromGateIO(
+                "82cac15cbe518008df484e9a5ad330b7",
+                "7b92fc112e895d9f509ac8fec4bf392e3acc49065692cd4ba497cb70d71e0880");
+            List<Candle> candles = Candle.FromJsons(candleJsons);
+            foreach (Candle candle in candles)
+            {
+                txtTestOutput.Text += candle.ToString() + "\r\n";
+            }
         }
     }
 }

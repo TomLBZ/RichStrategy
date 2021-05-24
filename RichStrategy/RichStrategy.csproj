@@ -23,7 +23,7 @@
     <Content Include="QQ截图20120504203117 - 副本.ico" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Io.Gate.GateApi" Version="4.20.1" />
+    <PackageReference Include="Io.Gate.GateApi" Version="4.20.2" />
     <PackageReference Include="JsonSubTypes" Version="1.8.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Microsoft.Windows.Compatibility" Version="5.0.2" />

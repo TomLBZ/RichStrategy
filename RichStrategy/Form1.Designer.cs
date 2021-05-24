@@ -62,14 +62,16 @@ namespace RichStrategy
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.txtTestOutput = new System.Windows.Forms.TextBox();
-            this.btnTestAPI = new System.Windows.Forms.Button();
+            this.grpControls = new System.Windows.Forms.GroupBox();
             this.btnTestData = new System.Windows.Forms.Button();
+            this.btnTestAPI = new System.Windows.Forms.Button();
+            this.txtTestOutput = new System.Windows.Forms.TextBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.graph1 = new RichStrategy.Graph();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
+            this.grpControls.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.graph1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -321,9 +323,8 @@ namespace RichStrategy
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.grpControls);
             this.tabPage1.Controls.Add(this.txtTestOutput);
-            this.tabPage1.Controls.Add(this.btnTestAPI);
-            this.tabPage1.Controls.Add(this.btnTestData);
             this.tabPage1.Location = new System.Drawing.Point(4, 24);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
@@ -332,38 +333,50 @@ namespace RichStrategy
             this.tabPage1.Text = "tabPage1";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
-            // txtTestOutput
+            // grpControls
             // 
-            this.txtTestOutput.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtTestOutput.Location = new System.Drawing.Point(3, 64);
-            this.txtTestOutput.Multiline = true;
-            this.txtTestOutput.Name = "txtTestOutput";
-            this.txtTestOutput.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtTestOutput.Size = new System.Drawing.Size(191, 551);
-            this.txtTestOutput.TabIndex = 2;
+            this.grpControls.Controls.Add(this.btnTestData);
+            this.grpControls.Controls.Add(this.btnTestAPI);
+            this.grpControls.Dock = System.Windows.Forms.DockStyle.Top;
+            this.grpControls.Location = new System.Drawing.Point(3, 3);
+            this.grpControls.Name = "grpControls";
+            this.grpControls.Size = new System.Drawing.Size(191, 149);
+            this.grpControls.TabIndex = 3;
+            this.grpControls.TabStop = false;
+            this.grpControls.Text = "Controls";
+            // 
+            // btnTestData
+            // 
+            this.btnTestData.Location = new System.Drawing.Point(6, 103);
+            this.btnTestData.Name = "btnTestData";
+            this.btnTestData.Size = new System.Drawing.Size(80, 40);
+            this.btnTestData.TabIndex = 0;
+            this.btnTestData.Text = "TestData";
+            this.btnTestData.UseVisualStyleBackColor = true;
+            this.btnTestData.Click += new System.EventHandler(this.btnTestData_Click);
             // 
             // btnTestAPI
             // 
             this.btnTestAPI.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnTestAPI.Location = new System.Drawing.Point(99, 3);
+            this.btnTestAPI.Location = new System.Drawing.Point(106, 103);
             this.btnTestAPI.Name = "btnTestAPI";
-            this.btnTestAPI.Size = new System.Drawing.Size(95, 55);
+            this.btnTestAPI.Size = new System.Drawing.Size(80, 40);
             this.btnTestAPI.TabIndex = 1;
             this.btnTestAPI.Text = "Test API";
             this.btnTestAPI.UseVisualStyleBackColor = true;
             this.btnTestAPI.Click += new System.EventHandler(this.btnTestAPI_Click);
             // 
-            // btnTestData
+            // txtTestOutput
             // 
-            this.btnTestData.Location = new System.Drawing.Point(3, 3);
-            this.btnTestData.Name = "btnTestData";
-            this.btnTestData.Size = new System.Drawing.Size(95, 55);
-            this.btnTestData.TabIndex = 0;
-            this.btnTestData.Text = "TestData";
-            this.btnTestData.UseVisualStyleBackColor = true;
-            this.btnTestData.Click += new System.EventHandler(this.btnTestData_Click);
+            this.txtTestOutput.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtTestOutput.Location = new System.Drawing.Point(3, 158);
+            this.txtTestOutput.Multiline = true;
+            this.txtTestOutput.Name = "txtTestOutput";
+            this.txtTestOutput.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.txtTestOutput.Size = new System.Drawing.Size(191, 457);
+            this.txtTestOutput.TabIndex = 2;
             // 
             // tabPage2
             // 
@@ -409,6 +422,7 @@ namespace RichStrategy
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
+            this.grpControls.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.graph1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -454,6 +468,7 @@ namespace RichStrategy
         private System.Windows.Forms.Button btnTestData;
         private System.Windows.Forms.TextBox txtTestOutput;
         private System.Windows.Forms.Button btnTestAPI;
+        private System.Windows.Forms.GroupBox grpControls;
     }
 }
 

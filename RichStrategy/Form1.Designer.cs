@@ -66,18 +66,20 @@ namespace RichStrategy
             this.btnTestAPI = new System.Windows.Forms.Button();
             this.txtTestOutput = new System.Windows.Forms.TextBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.candleGraph1 = new RichStrategy.CandleGraph();
+            this.candleGraph10S = new RichStrategy.CandleGraph();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.candleGraph2 = new RichStrategy.CandleGraph();
-            this.candleGraph3 = new RichStrategy.CandleGraph();
+            this.candleGraph1M = new RichStrategy.CandleGraph();
+            this.candleGraph5M = new RichStrategy.CandleGraph();
+            this.candleGraph15M = new RichStrategy.CandleGraph();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.grpControls.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.candleGraph1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.candleGraph10S)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.candleGraph2)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.candleGraph3)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.candleGraph1M)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.candleGraph5M)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.candleGraph15M)).BeginInit();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -383,64 +385,80 @@ namespace RichStrategy
             this.tabPage2.Text = "tabPage2";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
-            // candleGraph1
+            // candleGraph10S
             // 
-            this.candleGraph1.AutoUpdateEnabled = false;
-            this.candleGraph1.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("candleGraph1.BackgroundImage")));
-            this.candleGraph1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.candleGraph1.Image = ((System.Drawing.Image)(resources.GetObject("candleGraph1.Image")));
-            this.candleGraph1.Location = new System.Drawing.Point(3, 3);
-            this.candleGraph1.Name = "candleGraph1";
-            this.candleGraph1.Size = new System.Drawing.Size(704, 209);
-            this.candleGraph1.TabIndex = 2;
-            this.candleGraph1.TabStop = false;
-            this.candleGraph1.TimeFrame = RichStrategy.Strategy.TIMEFRAME.TF_1M;
-            this.candleGraph1.UpdatePeriodSeconds = 10;
+            this.candleGraph10S.AutoUpdateEnabled = false;
+            this.candleGraph10S.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("candleGraph10S.BackgroundImage")));
+            this.candleGraph10S.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.candleGraph10S.Image = ((System.Drawing.Image)(resources.GetObject("candleGraph10S.Image")));
+            this.candleGraph10S.Location = new System.Drawing.Point(3, 3);
+            this.candleGraph10S.Name = "candleGraph10S";
+            this.candleGraph10S.Size = new System.Drawing.Size(704, 155);
+            this.candleGraph10S.TabIndex = 2;
+            this.candleGraph10S.TabStop = false;
+            this.candleGraph10S.TimeFrame = RichStrategy.Strategy.TIMEFRAME.TF_10S;
+            this.candleGraph10S.UpdatePeriodSeconds = 10;
             // 
             // tableLayoutPanel1
             // 
             this.tableLayoutPanel1.ColumnCount = 1;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Controls.Add(this.candleGraph1, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.candleGraph2, 0, 1);
-            this.tableLayoutPanel1.Controls.Add(this.candleGraph3, 0, 2);
+            this.tableLayoutPanel1.Controls.Add(this.candleGraph10S, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.candleGraph1M, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.candleGraph5M, 0, 2);
+            this.tableLayoutPanel1.Controls.Add(this.candleGraph15M, 0, 3);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 24);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 3;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33334F));
+            this.tableLayoutPanel1.RowCount = 4;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(710, 646);
             this.tableLayoutPanel1.TabIndex = 3;
             // 
-            // candleGraph2
+            // candleGraph1M
             // 
-            this.candleGraph2.AutoUpdateEnabled = false;
-            this.candleGraph2.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("candleGraph2.BackgroundImage")));
-            this.candleGraph2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.candleGraph2.Image = ((System.Drawing.Image)(resources.GetObject("candleGraph2.Image")));
-            this.candleGraph2.Location = new System.Drawing.Point(3, 218);
-            this.candleGraph2.Name = "candleGraph2";
-            this.candleGraph2.Size = new System.Drawing.Size(704, 209);
-            this.candleGraph2.TabIndex = 3;
-            this.candleGraph2.TabStop = false;
-            this.candleGraph2.TimeFrame = RichStrategy.Strategy.TIMEFRAME.TF_5M;
-            this.candleGraph2.UpdatePeriodSeconds = 10;
+            this.candleGraph1M.AutoUpdateEnabled = false;
+            this.candleGraph1M.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("candleGraph1M.BackgroundImage")));
+            this.candleGraph1M.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.candleGraph1M.Image = ((System.Drawing.Image)(resources.GetObject("candleGraph1M.Image")));
+            this.candleGraph1M.Location = new System.Drawing.Point(3, 164);
+            this.candleGraph1M.Name = "candleGraph1M";
+            this.candleGraph1M.Size = new System.Drawing.Size(704, 155);
+            this.candleGraph1M.TabIndex = 3;
+            this.candleGraph1M.TabStop = false;
+            this.candleGraph1M.TimeFrame = RichStrategy.Strategy.TIMEFRAME.TF_1M;
+            this.candleGraph1M.UpdatePeriodSeconds = 10;
             // 
-            // candleGraph3
+            // candleGraph5M
             // 
-            this.candleGraph3.AutoUpdateEnabled = false;
-            this.candleGraph3.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("candleGraph3.BackgroundImage")));
-            this.candleGraph3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.candleGraph3.Image = ((System.Drawing.Image)(resources.GetObject("candleGraph3.Image")));
-            this.candleGraph3.Location = new System.Drawing.Point(3, 433);
-            this.candleGraph3.Name = "candleGraph3";
-            this.candleGraph3.Size = new System.Drawing.Size(704, 210);
-            this.candleGraph3.TabIndex = 4;
-            this.candleGraph3.TabStop = false;
-            this.candleGraph3.TimeFrame = RichStrategy.Strategy.TIMEFRAME.TF_15M;
-            this.candleGraph3.UpdatePeriodSeconds = 10;
+            this.candleGraph5M.AutoUpdateEnabled = false;
+            this.candleGraph5M.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("candleGraph5M.BackgroundImage")));
+            this.candleGraph5M.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.candleGraph5M.Image = ((System.Drawing.Image)(resources.GetObject("candleGraph5M.Image")));
+            this.candleGraph5M.Location = new System.Drawing.Point(3, 325);
+            this.candleGraph5M.Name = "candleGraph5M";
+            this.candleGraph5M.Size = new System.Drawing.Size(704, 155);
+            this.candleGraph5M.TabIndex = 4;
+            this.candleGraph5M.TabStop = false;
+            this.candleGraph5M.TimeFrame = RichStrategy.Strategy.TIMEFRAME.TF_5M;
+            this.candleGraph5M.UpdatePeriodSeconds = 10;
+            // 
+            // candleGraph15M
+            // 
+            this.candleGraph15M.AutoUpdateEnabled = false;
+            this.candleGraph15M.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("candleGraph15M.BackgroundImage")));
+            this.candleGraph15M.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.candleGraph15M.Image = ((System.Drawing.Image)(resources.GetObject("candleGraph15M.Image")));
+            this.candleGraph15M.Location = new System.Drawing.Point(3, 486);
+            this.candleGraph15M.Name = "candleGraph15M";
+            this.candleGraph15M.Size = new System.Drawing.Size(704, 157);
+            this.candleGraph15M.TabIndex = 5;
+            this.candleGraph15M.TabStop = false;
+            this.candleGraph15M.TimeFrame = RichStrategy.Strategy.TIMEFRAME.TF_15M;
+            this.candleGraph15M.UpdatePeriodSeconds = 10;
             // 
             // frmMain
             // 
@@ -463,10 +481,11 @@ namespace RichStrategy
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
             this.grpControls.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.candleGraph1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.candleGraph10S)).EndInit();
             this.tableLayoutPanel1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.candleGraph2)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.candleGraph3)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.candleGraph1M)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.candleGraph5M)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.candleGraph15M)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -510,10 +529,11 @@ namespace RichStrategy
         private System.Windows.Forms.TextBox txtTestOutput;
         private System.Windows.Forms.Button btnTestAPI;
         private System.Windows.Forms.GroupBox grpControls;
-        private CandleGraph candleGraph1;
+        private CandleGraph candleGraph10S;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
-        private CandleGraph candleGraph2;
-        private CandleGraph candleGraph3;
+        private CandleGraph candleGraph1M;
+        private CandleGraph candleGraph5M;
+        private CandleGraph candleGraph15M;
     }
 }
 

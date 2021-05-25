@@ -47,12 +47,22 @@ namespace RichStrategy
 
         private void frmMain_Load(object sender, EventArgs e)
         {
-            candleGraph1.UpdatePeriodSeconds = 1;
-            candleGraph1.AutoUpdateEnabled = true;
-            candleGraph2.UpdatePeriodSeconds = 1;
-            candleGraph2.AutoUpdateEnabled = true;
-            candleGraph3.UpdatePeriodSeconds = 1;
-            candleGraph3.AutoUpdateEnabled = true;
+            candleGraph10S.TimeFrame = Strategy.TIMEFRAME.TF_10S;
+            candleGraph10S.UpdatePeriodSeconds = 1;
+            candleGraph10S.AutoUpdateEnabled = true;
+            candleGraph10S.UpdateData();
+            candleGraph1M.TimeFrame = Strategy.TIMEFRAME.TF_1M;
+            candleGraph1M.UpdatePeriodSeconds = 6;
+            candleGraph1M.AutoUpdateEnabled = true;
+            candleGraph1M.UpdateData();
+            candleGraph5M.TimeFrame = Strategy.TIMEFRAME.TF_5M;
+            candleGraph5M.UpdatePeriodSeconds = 30;
+            candleGraph5M.AutoUpdateEnabled = true;
+            candleGraph5M.UpdateData();
+            candleGraph15M.TimeFrame = Strategy.TIMEFRAME.TF_15M;
+            candleGraph15M.UpdatePeriodSeconds = 90;
+            candleGraph15M.AutoUpdateEnabled = true;
+            candleGraph15M.UpdateData();
         }
     }
 }

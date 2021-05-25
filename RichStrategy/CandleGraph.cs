@@ -287,7 +287,7 @@ namespace RichStrategy
         #endregion
 
         #region Events
-        private async void UpdateData()
+        public async void UpdateData()
         {
             await Task.Factory.StartNew(() =>
             {

@@ -63,16 +63,15 @@ namespace RichStrategy
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.grpControls = new System.Windows.Forms.GroupBox();
-            this.btnTestData = new System.Windows.Forms.Button();
             this.btnTestAPI = new System.Windows.Forms.Button();
             this.txtTestOutput = new System.Windows.Forms.TextBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.graph1 = new RichStrategy.Graph();
+            this.candleGraph1 = new RichStrategy.CandleGraph();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.grpControls.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.graph1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.candleGraph1)).BeginInit();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -335,7 +334,6 @@ namespace RichStrategy
             // 
             // grpControls
             // 
-            this.grpControls.Controls.Add(this.btnTestData);
             this.grpControls.Controls.Add(this.btnTestAPI);
             this.grpControls.Dock = System.Windows.Forms.DockStyle.Top;
             this.grpControls.Location = new System.Drawing.Point(3, 3);
@@ -344,16 +342,6 @@ namespace RichStrategy
             this.grpControls.TabIndex = 3;
             this.grpControls.TabStop = false;
             this.grpControls.Text = "Controls";
-            // 
-            // btnTestData
-            // 
-            this.btnTestData.Location = new System.Drawing.Point(6, 103);
-            this.btnTestData.Name = "btnTestData";
-            this.btnTestData.Size = new System.Drawing.Size(80, 40);
-            this.btnTestData.TabIndex = 0;
-            this.btnTestData.Text = "TestData";
-            this.btnTestData.UseVisualStyleBackColor = true;
-            this.btnTestData.Click += new System.EventHandler(this.btnTestData_Click);
             // 
             // btnTestAPI
             // 
@@ -388,27 +376,26 @@ namespace RichStrategy
             this.tabPage2.Text = "tabPage2";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
-            // graph1
+            // candleGraph1
             // 
-            this.graph1.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("graph1.BackgroundImage")));
-            this.graph1.CandleCompoundCount = 10;
-            this.graph1.Data = null;
-            this.graph1.DataFrames = 500;
-            this.graph1.DataIntervalSeconds = 30;
-            this.graph1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.graph1.Image = ((System.Drawing.Image)(resources.GetObject("graph1.Image")));
-            this.graph1.Location = new System.Drawing.Point(0, 24);
-            this.graph1.Name = "graph1";
-            this.graph1.Size = new System.Drawing.Size(710, 646);
-            this.graph1.TabIndex = 2;
-            this.graph1.TabStop = false;
+            this.candleGraph1.AutoUpdateEnabled = false;
+            this.candleGraph1.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("candleGraph1.BackgroundImage")));
+            this.candleGraph1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.candleGraph1.Image = ((System.Drawing.Image)(resources.GetObject("candleGraph1.Image")));
+            this.candleGraph1.Location = new System.Drawing.Point(0, 24);
+            this.candleGraph1.Name = "candleGraph1";
+            this.candleGraph1.Size = new System.Drawing.Size(710, 646);
+            this.candleGraph1.TabIndex = 2;
+            this.candleGraph1.TabStop = false;
+            this.candleGraph1.TimeFrame = RichStrategy.Strategy.TIMEFRAME.TF_1M;
+            this.candleGraph1.UpdatePeriodSeconds = 10;
             // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(915, 670);
-            this.Controls.Add(this.graph1);
+            this.Controls.Add(this.candleGraph1);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.menuStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -417,13 +404,14 @@ namespace RichStrategy
             this.MinimumSize = new System.Drawing.Size(600, 400);
             this.Name = "frmMain";
             this.Text = "RichStrategy";
+            this.Load += new System.EventHandler(this.frmMain_Load);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
             this.grpControls.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.graph1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.candleGraph1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -464,11 +452,10 @@ namespace RichStrategy
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.TabPage tabPage2;
-        private Graph graph1;
-        private System.Windows.Forms.Button btnTestData;
         private System.Windows.Forms.TextBox txtTestOutput;
         private System.Windows.Forms.Button btnTestAPI;
         private System.Windows.Forms.GroupBox grpControls;
+        private CandleGraph candleGraph1;
     }
 }
 

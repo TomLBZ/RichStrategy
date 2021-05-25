@@ -18,13 +18,8 @@ namespace RichStrategy
         {
             InitializeComponent();
             rnd = new Random();
-            //gateIO = new GateIO();
-            graph1.DataFrames = 5000;
         }
 
-        double starting_price = 57600;
-        double volatility = 0.0001020320726; // 30 days 3.00%, 1 day 0.547722575%, 1 hour 0.1118033989%, 5 minute 0.03227486122%, 30 seconds 0.01020320736%
-        double daily_drift = 0;
         /// <summary>
         /// 计划的逻辑（未实现）：
         /// 1、如果计时未开启则开启计时，如果分析器未配置则配置分析器
@@ -38,42 +33,22 @@ namespace RichStrategy
         /// </summary>
         /// <param name="sender">源</param>
         /// <param name="e">参</param>
-        private void btnTestData_Click(object sender, EventArgs e)
-        {
-            List<double> data = new List<double>();
-            for (int i = 0; i < 5000; i++)
-            {
-                double dRtn = rnd.NextGaussian(0, volatility);
-                //double norm_inversed = NormalDistribution.NormInv(rnd.NextGaussian(), 0, volatility);
-                //while (double.IsInfinity(norm_inversed)) norm_inversed = NormalDistribution.NormInv(rnd.NextGaussian(), 0, volatility);
-                double new_price = starting_price * (1 + dRtn + daily_drift);
-                data.Add(new_price);
-                starting_price = new_price;
-            }
-            graph1.Data = data.ToArray();
-            graph1.Redraw();
-        }
-        protected override void OnMouseWheel(MouseEventArgs e)
-        {
-            if (e.X >= graph1.Location.X && e.X <= graph1.Location.X + graph1.Width
-            &&
-            e.Y >= graph1.Location.Y && e.Y <= graph1.Location.Y + graph1.Height)
-            {
-                graph1.OnMouseWheel(e);
-            }
-            base.OnMouseWheel(e);
-        }
 
         private void btnTestAPI_Click(object sender, EventArgs e)
         {
-            List<string> candleJsons = API.GateIO.GetCandlesFromGateIO(
-                "82cac15cbe518008df484e9a5ad330b7",
-                "7b92fc112e895d9f509ac8fec4bf392e3acc49065692cd4ba497cb70d71e0880");
+            List<string> candleJsons = API.GateIO.GetCandleStringsFromGateIO(
+                API.GateIO.Key, API.GateIO.Secret, Strategy.TIMEFRAME.TF_10S);
             List<Candle> candles = Candle.FromJsons(candleJsons);
             foreach (Candle candle in candles)
             {
                 txtTestOutput.Text += candle.ToString() + "\r\n";
             }
+        }
+
+        private void frmMain_Load(object sender, EventArgs e)
+        {
+            candleGraph1.UpdatePeriodSeconds = 1;
+            candleGraph1.AutoUpdateEnabled = true;
         }
     }
 }

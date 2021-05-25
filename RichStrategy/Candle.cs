@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace RichStrategy
 {
-    class Candle
+    public class Candle
     {
         public double TimestampUnix { get; set; }
         public double Volume { get; set; }
@@ -50,12 +50,32 @@ namespace RichStrategy
                 string j = json.Replace("\"", "").Replace(",", "").Replace(
                     ":", "").Replace(" ", "");
                 string[] sep_json = j.Split("\r\n")[1..^1];
-                TimestampUnix = Convert.ToDouble(sep_json[0][1..]);
-                Volume = Convert.ToDouble(sep_json[1][1..]);
-                Close = Convert.ToDouble(sep_json[2][1..]);
-                High = Convert.ToDouble(sep_json[3][1..]);
-                Low = Convert.ToDouble(sep_json[4][1..]);
-                Open = Convert.ToDouble(sep_json[5][1..]);
+                foreach (string str in sep_json)
+                {
+                    switch (str[0])
+                    {
+                        case 't':
+                            TimestampUnix = Convert.ToDouble(str[1..]);
+                            break;
+                        case 'v':
+                            Volume = Convert.ToDouble(str[1..]);
+                            break;
+                        case 'c':
+                            Close = Convert.ToDouble(str[1..]);
+                            break;
+                        case 'h':
+                            High = Convert.ToDouble(str[1..]);
+                            break;
+                        case 'l':
+                            Low = Convert.ToDouble(str[1..]);
+                            break;
+                        case 'o':
+                            Open = Convert.ToDouble(str[1..]);
+                            break;
+                        default:
+                            throw new Exception("Unknown Json");
+                    }
+                }
             }
         }
 

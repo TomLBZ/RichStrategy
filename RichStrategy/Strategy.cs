@@ -10,7 +10,7 @@ namespace RichStrategy.Strategy
     {
         public static double TOKEN_FRACTION = 0.25;
         public static double PROFIT_RISK_RATIO = 1.4142;
-        public static TIMEFRAME TimeFrame = TIMEFRAME.TF_30S;
+        public static TIMEFRAME TimeFrame = TIMEFRAME.TF_10S;
         public static int Leverage = 5;
         public static int MaxDataFrameInDays = 1;
         public static int TimeOutSeconds = 60;

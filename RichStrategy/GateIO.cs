@@ -7,29 +7,38 @@ using System.Diagnostics;
 using Io.Gate.GateApi.Api;
 using Io.Gate.GateApi.Client;
 using Io.Gate.GateApi.Model;
+using RichStrategy.Strategy;
 
 namespace RichStrategy.API
 {
     public static class GateIO
     {
-        public static List<string> GetCandlesFromGateIO(
-            string key, string secret)
+        public static readonly string Key = "82cac15cbe518008df484e9a5ad330b7";
+
+        public static readonly string Secret = "7b92fc112e895d9f509ac8fec4bf392e3acc49065692cd4ba497cb70d71e0880";
+        public static List<string> GetCandleStringsFromGateIO(string key, string secret, 
+            TIMEFRAME timeFrame, string settle = "btc", string contract = "BTC_USD", int count = 100)
         {
             Configuration config = new Configuration();
             config.BasePath = "https://api.gateio.ws/api/v4";
             config.ApiV4Key = key;
             config.ApiV4Secret = secret;
             FuturesApi fa = new FuturesApi(config);
-            const string settle = "btc";  // string | Settle currency
-            const string contract = "BTC_USD";
-            const string leverage = "10";
-            List<FuturesCandlestick> candles = fa.ListFuturesCandlesticks(settle, contract);
+            List<FuturesCandlestick> candles = fa.ListFuturesCandlesticks(
+                settle, contract, null, null, count, timeFrame.GetDescription());
             List<string> candleJsons = new();
             foreach (FuturesCandlestick fcs in candles)
             {
                 candleJsons.Add(fcs.ToJson());
             }
             return candleJsons;
+        }
+
+        public static List<Candle> GetCandlesFromGateIO(string key, string secret,
+            TIMEFRAME timeFrame, string settle = "btc", string contract = "BTC_USD", int count = 100)
+        {
+            return Candle.FromJsons(GetCandleStringsFromGateIO(
+                key, secret, timeFrame, settle, contract, count));
         }
 
     }

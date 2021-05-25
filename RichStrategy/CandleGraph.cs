@@ -183,9 +183,10 @@ namespace RichStrategy
         }
         private void Redraw()
         {
+            if (Width == 0 || Height == 0) return;
             if (_DrawingMutex) return;
             _DrawingMutex = true;
-            if (Image is null) Image = new Bitmap(Width, Height);
+            if (null == Image) Image = new Bitmap(Width, Height);
             if (BackgroundImage is null) BackgroundImage = new Bitmap(Width, Height);
             if (_IsEmptyData) DrawEmpty();
             else
@@ -324,13 +325,14 @@ namespace RichStrategy
         }
         private void CG_SizeChanged(object sender, EventArgs e)
         {
-            if (BackgroundImage is not null && BackgroundImage.Width != Width || BackgroundImage.Height != Height)
+            if (Width == 0 || Height == 0) return;
+            if (null != BackgroundImage && BackgroundImage.Width != Width || BackgroundImage.Height != Height)
             {
                 Image img = BackgroundImage;
                 BackgroundImage = null;
                 img.Dispose();
             }
-            if (Image is not null && Image.Width != Width || Image.Height != Height)
+            if (null != Image && Image.Width != Width || Image.Height != Height)
             {
                 Image img = Image;
                 Image = null;

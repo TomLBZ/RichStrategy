@@ -49,6 +49,10 @@ namespace RichStrategy
         {
             candleGraph1.UpdatePeriodSeconds = 1;
             candleGraph1.AutoUpdateEnabled = true;
+            candleGraph2.UpdatePeriodSeconds = 1;
+            candleGraph2.AutoUpdateEnabled = true;
+            candleGraph3.UpdatePeriodSeconds = 1;
+            candleGraph3.AutoUpdateEnabled = true;
         }
     }
 }

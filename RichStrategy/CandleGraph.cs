@@ -128,7 +128,11 @@ namespace RichStrategy
         }
         private void DrawTrends(Graphics g)
         {
-
+            List<PointF>[] zigzag = GetTrendZiglinesFromCandles();
+            Color bullColor = Color.FromArgb(128, _ColorBull);
+            Color bearColor = Color.FromArgb(128, _ColorBear);
+            g.DrawLines(new Pen(bullColor), zigzag[0].ToArray());
+            g.DrawLines(new Pen(bearColor), zigzag[1].ToArray());
         }
         private void DrawIndicators(Graphics g)
         {
@@ -206,6 +210,81 @@ namespace RichStrategy
         }
         #endregion
 
+        #region Analysis
+        private List<PointF>[] GetTrendZiglinesFromCandles()
+        {
+            List<PointF> highList = new();
+            List<PointF> lowList = new();
+            float oldHigher = -1, oldLower = -1, oldLineX = -1;
+            float lastHigher = -1, lastLower = -1, lastLineX = -1;
+            int trendState = 0; // -1 down, 0 unknown, 1 up
+            for (int i = 0; i < _CandleList.Count; i++)
+            {
+                Candle candle = _CandleList[i];
+                float lineX = i * _CandleWidth + (float)(_CandleWidth / 2);
+                float higher = (float)Math.Max(candle.Open, candle.Close);
+                float lower = (float)Math.Min(candle.Open, candle.Close);
+                if (oldHigher == -1 && oldLower == -1)
+                {
+                    oldHigher = higher;
+                    oldLower = lower;
+                    oldLineX = lineX;
+                    lastHigher = higher;
+                    lastLower = lower;
+                    trendState = 0;
+                    continue;
+                }
+                if (higher >= lastHigher && lower >= lastLower)
+                {
+                    if (trendState != 1)
+                    {
+                        highList.Add(new PointF(oldLineX, oldHigher));
+                        lowList.Add(new PointF(oldLineX, oldLower));
+                        trendState = 1;
+                        oldHigher = lastHigher;
+                        oldLower = lastLower;
+                        oldLineX = lastLineX;
+                    }
+                }
+                else if (higher <= lastHigher && lower <= lastLower)
+                {
+                    if (trendState != -1)
+                    {
+                        highList.Add(new PointF(oldLineX, oldHigher));
+                        lowList.Add(new PointF(oldLineX, oldLower));
+                        trendState = -1;
+                        oldHigher = lastHigher;
+                        oldLower = lastLower;
+                        oldLineX = lastLineX;
+                    }
+                }
+                else
+                {
+                    if (trendState != 0)
+                    {
+                        highList.Add(new PointF(oldLineX, oldHigher));
+                        lowList.Add(new PointF(oldLineX, oldLower));
+                        trendState = 0;
+                        oldHigher = lastHigher;
+                        oldLower = lastLower;
+                        oldLineX = lastLineX;
+                    }
+                }
+                lastHigher = higher;
+                lastLower = lower;
+                lastLineX = lineX;
+            }
+            Candle candleLast = _CandleList[^1];
+            float lineXLast = (float)(_FrameWidth - _CandleWidth / 2);
+            float higherLast = (float)Math.Max(candleLast.Open, candleLast.Close);
+            float lowerLast = (float)Math.Min(candleLast.Open, candleLast.Close);
+            highList.Add(new PointF(lineXLast, higherLast));
+            lowList.Add(new PointF(lineXLast, lowerLast));
+            List<PointF>[] rtn = { highList, lowList };
+            return rtn;
+        }
+        #endregion
+
         #region Events
         private async void UpdateData()
         {
@@ -218,7 +297,7 @@ namespace RichStrategy
         }
         private void CG_MouseWheel(object sender, MouseEventArgs e)
         {
-            _DataFrame += e.Delta / 60;
+            _DataFrame += e.Delta / 12; // wheel once => increase by 10
             if (_DataFrame < 100) _DataFrame = 100;
             UpdateData();
         }

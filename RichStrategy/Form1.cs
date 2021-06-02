@@ -23,11 +23,6 @@ namespace RichStrategy
             _Strategy = new();
         }
 
-        private void btnTestAPI_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private void frmMain_Load(object sender, EventArgs e)
         {
             candleGraph10S.TimeFrame = Strategy.TIMEFRAME.TF_10S;
@@ -56,6 +51,11 @@ namespace RichStrategy
         private void PeriodicTrigger()
         {
             txtTestOutput.Text = _10SData.ToString() + _1MData.ToString() + _5MData.ToString() + _30MData.ToString();
+        }
+
+        private void btnTestStrategy_Click(object sender, EventArgs e)
+        {
+            txtStrategyResult.Text = "Start Fund:1000, Trades:10, Leverage:10, Current Position: 200 Tokens, Gain:100, etc...";
         }
     }
 }

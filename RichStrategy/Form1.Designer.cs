@@ -71,6 +71,7 @@ namespace RichStrategy
             this.candleGraph1M = new RichStrategy.CandleGraph();
             this.candleGraph5M = new RichStrategy.CandleGraph();
             this.candleGraph30M = new RichStrategy.CandleGraph();
+            this.txtStrategyResult = new System.Windows.Forms.TextBox();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.Status.SuspendLayout();
@@ -353,6 +354,7 @@ namespace RichStrategy
             // 
             // tabPageStrategy
             // 
+            this.tabPageStrategy.Controls.Add(this.txtStrategyResult);
             this.tabPageStrategy.Controls.Add(this.grpControls);
             this.tabPageStrategy.Location = new System.Drawing.Point(4, 24);
             this.tabPageStrategy.Name = "tabPageStrategy";
@@ -382,6 +384,7 @@ namespace RichStrategy
             this.btnTestStrategy.TabIndex = 1;
             this.btnTestStrategy.Text = "Test Strategy";
             this.btnTestStrategy.UseVisualStyleBackColor = true;
+            this.btnTestStrategy.Click += new System.EventHandler(this.btnTestStrategy_Click);
             // 
             // candleGraph10S
             // 
@@ -458,6 +461,15 @@ namespace RichStrategy
             this.candleGraph30M.TimeFrame = RichStrategy.Strategy.TIMEFRAME.TF_15M;
             this.candleGraph30M.UpdatePeriodSeconds = 10;
             // 
+            // txtStrategyResult
+            // 
+            this.txtStrategyResult.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtStrategyResult.Location = new System.Drawing.Point(3, 71);
+            this.txtStrategyResult.Multiline = true;
+            this.txtStrategyResult.Name = "txtStrategyResult";
+            this.txtStrategyResult.Size = new System.Drawing.Size(191, 555);
+            this.txtStrategyResult.TabIndex = 5;
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -479,6 +491,7 @@ namespace RichStrategy
             this.Status.ResumeLayout(false);
             this.Status.PerformLayout();
             this.tabPageStrategy.ResumeLayout(false);
+            this.tabPageStrategy.PerformLayout();
             this.grpControls.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.candleGraph10S)).EndInit();
             this.tableLayoutPanel1.ResumeLayout(false);
@@ -535,6 +548,7 @@ namespace RichStrategy
         private System.Windows.Forms.TabPage Status;
         private System.Windows.Forms.GroupBox grpControls;
         private System.Windows.Forms.Button btnTestStrategy;
+        private System.Windows.Forms.TextBox txtStrategyResult;
     }
 }
 

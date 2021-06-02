@@ -4,14 +4,6 @@ using System.Reflection;
 
 namespace RichStrategy.Strategy
 {
-    public enum MARKET_SHAPE
-    {
-        TREND_UP,
-        TREND_DOWN,
-        TREND_SIDEWAYS,
-        TREND_CONFLICTING
-    }
-
     public enum TIMEFRAME
     {
         [Description("10s")]
@@ -61,25 +53,39 @@ namespace RichStrategy.Strategy
             return enumerationValue.ToString();
         }
     }
-
-	public struct MonetaryStatus
+    public class CandleGraphData
     {
-        public double MyTotalAssets;
-        public double MyBuyPosition;
-        public double MySellPosition;
-        public double MyAssetsReserve;
-        public double MyLeverage;
+        public TIMEFRAME TimeFrame { get; set; }
+        public int Trend { get; set; }
+        public double Value { get; set; }
+        public double Estimate { get; set; }
+        public double EMA8 { get; set; }
+        public double EMA20 { get; set; }
+        public double EMA50 { get; set; }
+        public double ATR14 { get; set; }
+        public double Volume { get; set; }
+        public double RefVolume { get; set; }
+        public CandleGraphData()
+        {
+            TimeFrame = 0;
+            Trend = 0;
+            Value = 0;
+            Estimate = 0;
+            EMA8 = 0;
+            EMA20 = 0;
+            EMA50 = 0;
+            ATR14 = 0;
+            Volume = 0;
+            RefVolume = 0;
+        }
+        public override string ToString()
+        {
+            string formatStr = "CandlegraphData: {{\r\n    TimeFrame: {0},\r\n    Trend: {1},\r\n    Value: {2},\r\n    " +
+                "Estimate: {3},\r\n    EMA8: {4},\r\n    EMA20: {5},\r\n    EMA50: {6},\r\n    ATR14: {7},\r\n    " +
+                "Volume: {8:0.##}k,\r\n    RefVolume: {9:0.##}k\r\n}}\r\n";
+            return string.Format(formatStr, TimeFrame.GetDescription(), Trend == 1 ? "Up" : Trend == -1 ? "Down" : "Unknown",
+                Value.ToString("C"), Estimate.ToString("C"), EMA8.ToString("C"), EMA20.ToString("C"), EMA50.ToString("C"),
+                ATR14.ToString("C"), Volume, RefVolume);
+        }
     }
-    public struct Position
-    {
-        public bool IsWaiting;
-        public bool IsBuy;
-        public int NumTokens;
-        public int TimeoutSeconds;
-        public int LifeTimeSeconds;
-        public double InPrice;
-        public double TargetPrice;
-        public double CurrentGain;
-    }
-
 }

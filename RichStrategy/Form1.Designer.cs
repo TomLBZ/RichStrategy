@@ -61,11 +61,11 @@ namespace RichStrategy
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl1 = new System.Windows.Forms.TabControl();
-            this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.grpControls = new System.Windows.Forms.GroupBox();
-            this.btnTestAPI = new System.Windows.Forms.Button();
+            this.Status = new System.Windows.Forms.TabPage();
             this.txtTestOutput = new System.Windows.Forms.TextBox();
-            this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.tabPageStrategy = new System.Windows.Forms.TabPage();
+            this.grpControls = new System.Windows.Forms.GroupBox();
+            this.btnTestStrategy = new System.Windows.Forms.Button();
             this.candleGraph10S = new RichStrategy.CandleGraph();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.candleGraph1M = new RichStrategy.CandleGraph();
@@ -73,7 +73,8 @@ namespace RichStrategy
             this.candleGraph30M = new RichStrategy.CandleGraph();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
-            this.tabPage1.SuspendLayout();
+            this.Status.SuspendLayout();
+            this.tabPageStrategy.SuspendLayout();
             this.grpControls.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.candleGraph10S)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
@@ -320,8 +321,8 @@ namespace RichStrategy
             // 
             // tabControl1
             // 
-            this.tabControl1.Controls.Add(this.tabPage1);
-            this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Controls.Add(this.Status);
+            this.tabControl1.Controls.Add(this.tabPageStrategy);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Right;
             this.tabControl1.Location = new System.Drawing.Point(739, 24);
             this.tabControl1.Name = "tabControl1";
@@ -329,61 +330,58 @@ namespace RichStrategy
             this.tabControl1.Size = new System.Drawing.Size(205, 657);
             this.tabControl1.TabIndex = 1;
             // 
-            // tabPage1
+            // Status
             // 
-            this.tabPage1.Controls.Add(this.grpControls);
-            this.tabPage1.Controls.Add(this.txtTestOutput);
-            this.tabPage1.Location = new System.Drawing.Point(4, 24);
-            this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(197, 629);
-            this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "tabPage1";
-            this.tabPage1.UseVisualStyleBackColor = true;
-            // 
-            // grpControls
-            // 
-            this.grpControls.Controls.Add(this.btnTestAPI);
-            this.grpControls.Dock = System.Windows.Forms.DockStyle.Top;
-            this.grpControls.Location = new System.Drawing.Point(3, 3);
-            this.grpControls.Name = "grpControls";
-            this.grpControls.Size = new System.Drawing.Size(191, 149);
-            this.grpControls.TabIndex = 3;
-            this.grpControls.TabStop = false;
-            this.grpControls.Text = "Controls";
-            // 
-            // btnTestAPI
-            // 
-            this.btnTestAPI.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnTestAPI.Location = new System.Drawing.Point(106, 103);
-            this.btnTestAPI.Name = "btnTestAPI";
-            this.btnTestAPI.Size = new System.Drawing.Size(80, 40);
-            this.btnTestAPI.TabIndex = 1;
-            this.btnTestAPI.Text = "Test API";
-            this.btnTestAPI.UseVisualStyleBackColor = true;
-            this.btnTestAPI.Click += new System.EventHandler(this.btnTestAPI_Click);
+            this.Status.Controls.Add(this.txtTestOutput);
+            this.Status.Location = new System.Drawing.Point(4, 24);
+            this.Status.Name = "Status";
+            this.Status.Padding = new System.Windows.Forms.Padding(3);
+            this.Status.Size = new System.Drawing.Size(197, 629);
+            this.Status.TabIndex = 0;
+            this.Status.Text = "Status";
+            this.Status.UseVisualStyleBackColor = true;
             // 
             // txtTestOutput
             // 
-            this.txtTestOutput.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtTestOutput.Location = new System.Drawing.Point(3, 158);
+            this.txtTestOutput.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtTestOutput.Location = new System.Drawing.Point(3, 3);
             this.txtTestOutput.Multiline = true;
             this.txtTestOutput.Name = "txtTestOutput";
             this.txtTestOutput.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtTestOutput.Size = new System.Drawing.Size(191, 468);
+            this.txtTestOutput.Size = new System.Drawing.Size(191, 623);
             this.txtTestOutput.TabIndex = 2;
             // 
-            // tabPage2
+            // tabPageStrategy
             // 
-            this.tabPage2.Location = new System.Drawing.Point(4, 24);
-            this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(197, 869);
-            this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "tabPage2";
-            this.tabPage2.UseVisualStyleBackColor = true;
+            this.tabPageStrategy.Controls.Add(this.grpControls);
+            this.tabPageStrategy.Location = new System.Drawing.Point(4, 24);
+            this.tabPageStrategy.Name = "tabPageStrategy";
+            this.tabPageStrategy.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageStrategy.Size = new System.Drawing.Size(197, 629);
+            this.tabPageStrategy.TabIndex = 1;
+            this.tabPageStrategy.Text = "Strategy";
+            this.tabPageStrategy.UseVisualStyleBackColor = true;
+            // 
+            // grpControls
+            // 
+            this.grpControls.Controls.Add(this.btnTestStrategy);
+            this.grpControls.Dock = System.Windows.Forms.DockStyle.Top;
+            this.grpControls.Location = new System.Drawing.Point(3, 3);
+            this.grpControls.Name = "grpControls";
+            this.grpControls.Size = new System.Drawing.Size(191, 68);
+            this.grpControls.TabIndex = 4;
+            this.grpControls.TabStop = false;
+            this.grpControls.Text = "Controls";
+            // 
+            // btnTestStrategy
+            // 
+            this.btnTestStrategy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnTestStrategy.Location = new System.Drawing.Point(6, 22);
+            this.btnTestStrategy.Name = "btnTestStrategy";
+            this.btnTestStrategy.Size = new System.Drawing.Size(80, 40);
+            this.btnTestStrategy.TabIndex = 1;
+            this.btnTestStrategy.Text = "Test Strategy";
+            this.btnTestStrategy.UseVisualStyleBackColor = true;
             // 
             // candleGraph10S
             // 
@@ -478,8 +476,9 @@ namespace RichStrategy
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.tabControl1.ResumeLayout(false);
-            this.tabPage1.ResumeLayout(false);
-            this.tabPage1.PerformLayout();
+            this.Status.ResumeLayout(false);
+            this.Status.PerformLayout();
+            this.tabPageStrategy.ResumeLayout(false);
             this.grpControls.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.candleGraph10S)).EndInit();
             this.tableLayoutPanel1.ResumeLayout(false);
@@ -524,16 +523,18 @@ namespace RichStrategy
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
         private System.Windows.Forms.TabControl tabControl1;
-        private System.Windows.Forms.TabPage tabPage1;
-        private System.Windows.Forms.TabPage tabPage2;
+        private System.Windows.Forms.TabPage tabPage;
+        private System.Windows.Forms.TabPage tabPageStrategy;
         private System.Windows.Forms.TextBox txtTestOutput;
         private System.Windows.Forms.Button btnTestAPI;
-        private System.Windows.Forms.GroupBox grpControls;
         private CandleGraph candleGraph10S;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private CandleGraph candleGraph1M;
         private CandleGraph candleGraph5M;
         private CandleGraph candleGraph30M;
+        private System.Windows.Forms.TabPage Status;
+        private System.Windows.Forms.GroupBox grpControls;
+        private System.Windows.Forms.Button btnTestStrategy;
     }
 }
 

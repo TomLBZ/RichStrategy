@@ -22,8 +22,10 @@ namespace RichStrategy
         private readonly Color _ColorEMA8 = Color.FromArgb(127, Color.LightPink);
         private readonly Color _ColorEMA20 = Color.FromArgb(127, Color.HotPink);
         private readonly Color _ColorEMA50 = Color.FromArgb(127, Color.DeepPink);
-        private readonly Color _ColorDistributionEstimator = Color.FromArgb(127, Color.Navy);
+        private readonly Color _ColorDistributionEstimator = Color.FromArgb(127, Color.Blue);
         private readonly Color _ColorTrendline = Color.FromArgb(127, Color.DarkKhaki);
+        private readonly Color _ColorATR14 = Color.FromArgb(127, Color.Cyan);
+        private readonly Color _ColorVolume = Color.FromArgb(127, Color.Orange);
         private TIMEFRAME _TimeFrame = TIMEFRAME.TF_1M;
         private readonly string _Contract = "BTC_USD";
         private readonly string _Settle = "btc";
@@ -40,9 +42,22 @@ namespace RichStrategy
         private bool _IsEmptyData = true;
         private bool _DrawingMutex = false;
         private bool _AutoUpdateEnabled = false;
+        private bool _IsExportData = false;
+        private bool _IsPeriodiclyTriggered = false;
         private List<Candle> _CandleList;
         private readonly Timer _Timer = new();
         private Random _Random = new();
+        private CandleGraphData _ExportData = new();
+        private Action _PeriodicTrigger = null;
+        private int _ExportableTrend = 0;
+        private double _ExportableEstimateY = 0.0;
+        private double _ExportableEMA8 = 0.0;
+        private double _ExportableEMA20 = 0.0;
+        private double _ExportableEMA50 = 0.0;
+        private double _ExportableATR14 = 0.0;
+        private double _ExportableVolume = 0.0;
+        private double _ExportableRefVolume = 0.0;
+        private double _ExportableValue = 0.0;
         #endregion
 
         #region Properties
@@ -74,7 +89,6 @@ namespace RichStrategy
                 }
             }
         }
-        
         public event PropertyChangedEventHandler PropertyChanged; 
         private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
         {
@@ -129,22 +143,39 @@ namespace RichStrategy
         private void DrawTrends(Graphics g)
         {
             List<PointF> closePoints = GetClosePricePointsFromCandles();
+            _ExportableValue = closePoints[^1].Y;
             List<PointF> turningClosePoints = GetTurningPointsFromPricePoints(closePoints);
             List<PointF> turningCloseZigZag = GetTrendZigLinesFromTurningPoints(turningClosePoints);
             g.DrawLines(new Pen(_ColorTrendline), turningCloseZigZag.ToArray());
+            PointF last = turningCloseZigZag[^1], last2 = turningCloseZigZag[^2];
+            _ExportableTrend = last.Y > last2.Y ? 1 : last.Y < last2.Y ? -1 : 0;
         }
         private void DrawIndicators(Graphics g)
         {
             double[] samples = GetNumericClosePricesFromCandles();
-            double estimateY = GetLocalDistributionEstimator(samples[^50..], ref _Random);
-            g.DrawLine(new Pen(_ColorDistributionEstimator), 0, (float)estimateY, (float)_FrameWidth, (float)estimateY);
+            _ExportableEstimateY = GetLocalDistributionEstimator(samples[^50..], ref _Random);
+            g.DrawLine(new Pen(_ColorDistributionEstimator), 0, (float)_ExportableEstimateY, (float)_FrameWidth, (float)_ExportableEstimateY);
             List<PointF> closePoints = GetClosePricePointsFromCandles();
             List<PointF> EMA8 = GetEMAFromPricePoints(closePoints, 8);
             List<PointF> EMA20 = GetEMAFromPricePoints(closePoints, 20);
             List<PointF> EMA50 = GetEMAFromPricePoints(closePoints, 50);
+            _ExportableEMA8 = EMA8[^1].Y;
+            _ExportableEMA20 = EMA20[^1].Y;
+            _ExportableEMA50 = EMA50[^1].Y;
             g.DrawLines(new Pen(_ColorEMA8), EMA8.ToArray());
             g.DrawLines(new Pen(_ColorEMA20), EMA20.ToArray());
             g.DrawLines(new Pen(_ColorEMA50), EMA50.ToArray());
+            List<PointF> ATR14 = GetATR14FromCandles();
+            _ExportableATR14 = ATR14[^1].Y - _MinY;
+            g.DrawLines(new Pen(_ColorATR14), ATR14.ToArray());
+            List<PointF> Volumes = GetVolumeFromCandles();
+            _ExportableVolume = (Volumes[^1].Y - _MinY) * (_CenterY - _MinY) / 1000.0;
+            g.DrawLines(new Pen(_ColorVolume), Volumes.ToArray());
+            double refVolume = 0;
+            foreach (PointF ptf in Volumes) refVolume += ptf.Y;
+            refVolume /= Volumes.Count;
+            g.DrawLine(new Pen(_ColorVolume), 0, (float)refVolume, (float)_FrameWidth, (float)refVolume);
+            _ExportableRefVolume = (refVolume - _MinY) * (_CenterY - _MinY) / 1000.0;
         }
         private void DrawEmpty()
         {
@@ -184,8 +215,9 @@ namespace RichStrategy
             string strX = valueX.ToString();
             SizeF strSize = g.MeasureString(strX, DefaultFont);
             float strxX = e.X + strSize.Width > Width ? e.X - strSize.Width : e.X;
+            float stryY = e.Y + strSize.Height > Height ? e.Y - strSize.Height : e.Y;
             SolidBrush labelBrush = new(_ColorLabel);
-            g.DrawString(valueY.ToString(), DefaultFont, labelBrush, 0, e.Y);
+            g.DrawString(valueY.ToString(), DefaultFont, labelBrush, 0, stryY);
             g.DrawString(strX, DefaultFont, labelBrush,  strxX, Height - strSize.Height);
         }
         private void Redraw()
@@ -194,7 +226,7 @@ namespace RichStrategy
             if (_DrawingMutex) return;
             _DrawingMutex = true;
             if (null == Image) Image = new Bitmap(Width, Height);
-            if (BackgroundImage is null) BackgroundImage = new Bitmap(Width, Height);
+            if (null == BackgroundImage) BackgroundImage = new Bitmap(Width, Height);
             if (_IsEmptyData) DrawEmpty();
             else
             {
@@ -369,18 +401,53 @@ namespace RichStrategy
             }
             return rtn;
         }
+        private List<PointF> GetATR14FromCandles()
+        {
+            Queue<double> TR14 = new(14);
+            Candle currentCandle, lastCandle;
+            double hcp, lcp, sumTR;
+            float lineX;
+            List<PointF> rtn = new();
+            for (int i = 1; i < 15; i++)
+            {
+                currentCandle = _CandleList[i];
+                lastCandle = _CandleList[i - 1];
+                hcp = Math.Abs(currentCandle.High - lastCandle.Close);
+                lcp = Math.Abs(currentCandle.Low - lastCandle.Close);
+                TR14.Enqueue(Math.Max(currentCandle.High - currentCandle.Low, Math.Max(hcp, lcp)));
+            }
+            sumTR = 0;
+            foreach (double d in TR14) sumTR += d;
+            lineX = 14f * _CandleWidth + _CandleWidth / 2f;
+            rtn.Add(new PointF(lineX, (float)(_MinY + sumTR / 14.0)));
+            for (int i = 15; i < _CandleList.Count; i++)
+            {
+                lineX = (float)i * _CandleWidth + _CandleWidth / 2f;
+                currentCandle = _CandleList[i];
+                lastCandle = _CandleList[i - 1];
+                hcp = Math.Abs(currentCandle.High - lastCandle.Close);
+                lcp = Math.Abs(currentCandle.Low - lastCandle.Close);
+                _ = TR14.Dequeue();
+                TR14.Enqueue(Math.Max(currentCandle.High - currentCandle.Low, Math.Max(hcp, lcp)));
+                sumTR = 0;
+                foreach (double d in TR14) sumTR += d;
+                rtn.Add(new PointF(lineX, (float)(_MinY + sumTR / 14.0)));
+            }
+            return rtn;
+        }
+        private List<PointF> GetVolumeFromCandles()
+        {
+            List<PointF> rtn = new();
+            for (int i = 0; i < _CandleList.Count; i++)
+            {
+                float lineX = (float)i * _CandleWidth + _CandleWidth / 2f;
+                rtn.Add(new PointF(lineX, (float)(_CandleList[i].Volume / (_CenterY - _MinY) + _MinY)));
+            }
+            return rtn;
+        }
         #endregion
 
         #region Events
-        public async void UpdateData()
-        {
-            await Task.Factory.StartNew(() =>
-            {
-                _CandleList = API.GateIO.GetCandlesFromGateIO(API.GateIO.Key, API.GateIO.Secret, _TimeFrame, _Settle, _Contract, _DataFrame);
-            });
-            RangeGraph();
-            Redraw();
-        }
         private void CG_MouseWheel(object sender, MouseEventArgs e)
         {
             _DataFrame += e.Delta / 12; // wheel once => increase by 10
@@ -427,12 +494,53 @@ namespace RichStrategy
         }
         private void Timer_Tick(object sender, EventArgs e)
         {
-            UpdateData();
+            UpdateData(true);
         }
         private void CG_PropertyChanged(object sender, EventArgs e)
         {
             _Timer.Interval = UpdatePeriodSeconds * 1000;
             _Timer.Enabled = AutoUpdateEnabled;
+        }
+        #endregion
+
+        #region Public Methods
+        public async void UpdateData(bool isTicked = false)
+        {
+            await Task.Factory.StartNew(() =>
+            {
+                _CandleList = API.GateIO.GetCandlesFromGateIO(API.GateIO.Key, API.GateIO.Secret, _TimeFrame, _Settle, _Contract, _DataFrame);
+            });
+            RangeGraph();
+            Redraw();
+            if (isTicked && _IsExportData) ExportData();
+            if (isTicked && _IsPeriodiclyTriggered) _PeriodicTrigger();
+        }
+        public void BindData(ref CandleGraphData data)
+        {
+            _IsExportData = true;
+            data = _ExportData;
+        }
+        public void SetPeriodicTrigger(Action trigger)
+        {
+            _PeriodicTrigger = trigger;
+            _IsPeriodiclyTriggered = true;
+        }
+        #endregion
+
+        #region Data Exports
+        private void ExportData()
+        {
+            if (!_IsExportData) return;
+            _ExportData.TimeFrame = _TimeFrame;
+            _ExportData.Trend = _ExportableTrend;
+            _ExportData.Value = _ExportableValue;
+            _ExportData.Estimate = _ExportableEstimateY;
+            _ExportData.EMA8 = _ExportableEMA8;
+            _ExportData.EMA20 = _ExportableEMA20;
+            _ExportData.EMA50 = _ExportableEMA50;
+            _ExportData.ATR14 = _ExportableATR14;
+            _ExportData.Volume = _ExportableVolume;
+            _ExportData.RefVolume = _ExportableRefVolume;
         }
         #endregion
 
@@ -450,7 +558,6 @@ namespace RichStrategy
             AutoUpdateEnabled = false;
             _Timer.Interval = UpdatePeriodSeconds * 1000;
             _Timer.Enabled = AutoUpdateEnabled;
-            _Random = new();
             Redraw();
         }
 

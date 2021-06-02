@@ -14,21 +14,21 @@ namespace RichStrategy
     public partial class CandleGraph : PictureBox, INotifyPropertyChanged
     {
         #region Private Members
-        private Color _ColorBack = Color.Black;
-        private Color _ColorCross = Color.DarkGray;
-        private Color _ColorLabel = Color.LightBlue;
-        private Color _ColorBull = Color.FromArgb(127, Color.Red);
-        private Color _ColorBear = Color.FromArgb(127, Color.LimeGreen);
-        private Color _ColorEMA8 = Color.FromArgb(127, Color.LightPink);
-        private Color _ColorEMA20 = Color.FromArgb(127, Color.HotPink);
-        private Color _ColorEMA50 = Color.FromArgb(127, Color.DeepPink);
-        private Color _ColorDistributionEstimator = Color.FromArgb(127, Color.Navy);
-        private Color _ColorTrendline = Color.FromArgb(127, Color.DarkKhaki);
+        private readonly Color _ColorBack = Color.Black;
+        private readonly Color _ColorCross = Color.DarkGray;
+        private readonly Color _ColorLabel = Color.LightBlue;
+        private readonly Color _ColorBull = Color.FromArgb(127, Color.Red);
+        private readonly Color _ColorBear = Color.FromArgb(127, Color.LimeGreen);
+        private readonly Color _ColorEMA8 = Color.FromArgb(127, Color.LightPink);
+        private readonly Color _ColorEMA20 = Color.FromArgb(127, Color.HotPink);
+        private readonly Color _ColorEMA50 = Color.FromArgb(127, Color.DeepPink);
+        private readonly Color _ColorDistributionEstimator = Color.FromArgb(127, Color.Navy);
+        private readonly Color _ColorTrendline = Color.FromArgb(127, Color.DarkKhaki);
         private TIMEFRAME _TimeFrame = TIMEFRAME.TF_1M;
-        private string _Contract = "BTC_USD";
-        private string _Settle = "btc";
+        private readonly string _Contract = "BTC_USD";
+        private readonly string _Settle = "btc";
         private int _DataFrame = 200;
-        private int _CandleWidth = 10;
+        private readonly int _CandleWidth = 10;
         private int _UpdatePeriodSeconds = 10;
         private double _MaxPrice = double.NegativeInfinity;
         private double _MinPrice = double.PositiveInfinity;
@@ -41,7 +41,7 @@ namespace RichStrategy
         private bool _DrawingMutex = false;
         private bool _AutoUpdateEnabled = false;
         private List<Candle> _CandleList;
-        private Timer _Timer = new();
+        private readonly Timer _Timer = new();
         private Random _Random = new();
         #endregion
 
@@ -78,10 +78,7 @@ namespace RichStrategy
         public event PropertyChangedEventHandler PropertyChanged; 
         private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
         #endregion
 
@@ -110,8 +107,8 @@ namespace RichStrategy
             for (int i = 0; i < _CandleList.Count; i++)
             {
                 Candle candle = _CandleList[i];
-                Color color = Color.Transparent;
-                float rectBLX = i * _CandleWidth, rectBLY = 0, candleHeight = 0;
+                Color color;
+                float rectBLX = i * _CandleWidth, rectBLY, candleHeight;
                 if (candle.Open > candle.Close)
                 {
                     color = _ColorBear;
@@ -154,7 +151,7 @@ namespace RichStrategy
             using (Graphics g = Graphics.FromImage(BackgroundImage))
             {
                 g.Clear(_ColorBack);
-                Pen pEmpty = new Pen(_ColorCross);
+                Pen pEmpty = new(_ColorCross);
                 g.DrawLine(pEmpty, 0, 0, Width, Height);
                 g.DrawLine(pEmpty, 0, Height, Width, 0);
             }
@@ -166,7 +163,7 @@ namespace RichStrategy
         }
         private void DrawLabels(Graphics g)
         {
-            SolidBrush labelBrush = new SolidBrush(_ColorLabel);
+            SolidBrush labelBrush = new(_ColorLabel);
             g.DrawString(_MaxY.ToString("C"), DefaultFont, labelBrush, 0, 0);
             g.DrawString(_CenterY.ToString("C"), DefaultFont, labelBrush, 0, (float)(Height / 2f));
             float strHeight = g.MeasureString(_MaxY.ToString(), DefaultFont).Height;
@@ -177,7 +174,7 @@ namespace RichStrategy
         }
         private void DrawCross(Graphics g, MouseEventArgs e)
         {
-            Pen gridPen = new Pen(_ColorCross, 0.001f);
+            Pen gridPen = new(_ColorCross, 0.001f);
             g.DrawLine(gridPen, 0, e.Y, Width, e.Y);
             g.DrawLine(gridPen, e.X, 0, e.X, Height);
             float fracDown = (float)e.Y / Height;
@@ -187,7 +184,7 @@ namespace RichStrategy
             string strX = valueX.ToString();
             SizeF strSize = g.MeasureString(strX, DefaultFont);
             float strxX = e.X + strSize.Width > Width ? e.X - strSize.Width : e.X;
-            SolidBrush labelBrush = new SolidBrush(_ColorLabel);
+            SolidBrush labelBrush = new(_ColorLabel);
             g.DrawString(valueY.ToString(), DefaultFont, labelBrush, 0, e.Y);
             g.DrawString(strX, DefaultFont, labelBrush,  strxX, Height - strSize.Height);
         }
@@ -222,237 +219,7 @@ namespace RichStrategy
         #endregion
 
         #region Analysis
-        private List<PointF>[] ReduceTrendZigZagLines(List<PointF> higherTrendPoints, List<PointF> lowerTrendPoints)
-        {
-            if (higherTrendPoints.Count != lowerTrendPoints.Count) return null;
-            List<PointF> highList = new();
-            List<PointF> lowList = new();
-            float oldHigher = -1, oldLower = -1, oldLineX = -1;
-            float lastHigher = -1, lastLower = -1, lastLineX = -1;
-            int trendState = 0; // -1 down, 0 unknown, 1 up
-            for (int i = 0; i < higherTrendPoints.Count; i += 2)
-            {
-                float lineX = higherTrendPoints[i].X;
-                float higher = higherTrendPoints[i].Y;
-                float lower = lowerTrendPoints[i].Y;
-                if (oldHigher == -1 && oldLower == -1)
-                {
-                    oldHigher = higher;
-                    oldLower = lower;
-                    oldLineX = lineX;
-                    lastHigher = higher;
-                    lastLower = lower;
-                    trendState = 0;
-                    continue;
-                }
-                if (higher >= lastHigher && lower >= lastLower)
-                {
-                    if (trendState != 1)
-                    {
-                        highList.Add(new PointF(oldLineX, oldHigher));
-                        lowList.Add(new PointF(oldLineX, oldLower));
-                        trendState = 1;
-                        oldHigher = lastHigher;
-                        oldLower = lastLower;
-                        oldLineX = lastLineX;
-                    }
-                }
-                else if (higher <= lastHigher && lower <= lastLower)
-                {
-                    if (trendState != -1)
-                    {
-                        highList.Add(new PointF(oldLineX, oldHigher));
-                        lowList.Add(new PointF(oldLineX, oldLower));
-                        trendState = -1;
-                        oldHigher = lastHigher;
-                        oldLower = lastLower;
-                        oldLineX = lastLineX;
-                    }
-                }
-                else
-                {
-                    if (trendState != 0)
-                    {
-                        highList.Add(new PointF(oldLineX, oldHigher));
-                        lowList.Add(new PointF(oldLineX, oldLower));
-                        trendState = 0;
-                        oldHigher = lastHigher;
-                        oldLower = lastLower;
-                        oldLineX = lastLineX;
-                    }
-                }
-                lastHigher = higher;
-                lastLower = lower;
-                lastLineX = lineX;
-            }
-            //Candle candleLast = _CandleList[^1];
-            float lineXLast = higherTrendPoints[^1].X;
-            float higherLast = higherTrendPoints[^1].Y;
-            float lowerLast = lowerTrendPoints[^1].Y;
-            highList.Add(new PointF(lineXLast, higherLast));
-            lowList.Add(new PointF(lineXLast, lowerLast));
-            List<PointF>[] rtn = { highList, lowList };
-            return rtn;
-        }
-        private List<PointF>[] GetTrendZiglinesFromCandles()
-        {
-            List<PointF> highList = new();
-            List<PointF> lowList = new();
-            float oldHigher = -1, oldLower = -1, oldLineX = -1;
-            float lastHigher = -1, lastLower = -1, lastLineX = -1;
-            int trendState = 0; // -1 down, 0 unknown, 1 up
-            for (int i = 0; i < _CandleList.Count; i++)
-            {
-                Candle candle = _CandleList[i];
-                float lineX = (float)i * _CandleWidth + _CandleWidth / 2f;
-                float higher = (float)Math.Max(candle.Open, candle.Close);
-                float lower = (float)Math.Min(candle.Open, candle.Close);
-                if (oldHigher == -1 && oldLower == -1)
-                {
-                    oldHigher = higher;
-                    oldLower = lower;
-                    oldLineX = lineX;
-                    lastHigher = higher;
-                    lastLower = lower;
-                    trendState = 0;
-                    continue;
-                }
-                if (higher >= lastHigher && lower >= lastLower)
-                {
-                    if (trendState != 1)
-                    {
-                        highList.Add(new PointF(oldLineX, oldHigher));
-                        lowList.Add(new PointF(oldLineX, oldLower));
-                        trendState = 1;
-                        oldHigher = lastHigher;
-                        oldLower = lastLower;
-                        oldLineX = lastLineX;
-                    }
-                }
-                else if (higher <= lastHigher && lower <= lastLower)
-                {
-                    if (trendState != -1)
-                    {
-                        highList.Add(new PointF(oldLineX, oldHigher));
-                        lowList.Add(new PointF(oldLineX, oldLower));
-                        trendState = -1;
-                        oldHigher = lastHigher;
-                        oldLower = lastLower;
-                        oldLineX = lastLineX;
-                    }
-                }
-                else
-                {
-                    if (trendState != 0)
-                    {
-                        highList.Add(new PointF(oldLineX, oldHigher));
-                        lowList.Add(new PointF(oldLineX, oldLower));
-                        trendState = 0;
-                        oldHigher = lastHigher;
-                        oldLower = lastLower;
-                        oldLineX = lastLineX;
-                    }
-                }
-                lastHigher = higher;
-                lastLower = lower;
-                lastLineX = lineX;
-            }
-            Candle candleLast = _CandleList[^1];
-            float lineXLast = (float)(_FrameWidth - _CandleWidth / 2);
-            float higherLast = (float)Math.Max(candleLast.Open, candleLast.Close);
-            float lowerLast = (float)Math.Min(candleLast.Open, candleLast.Close);
-            highList.Add(new PointF(lineXLast, higherLast));
-            lowList.Add(new PointF(lineXLast, lowerLast));
-            List<PointF>[] rtn = { highList, lowList };
-            return rtn;
-        }
-        private List<PointF> GetTrendZigLinesFromPricePoints(List<PointF> pricePoints)
-        {
-            List<PointF> rtn = new();
-            float startVal = pricePoints[0].Y, lastHigherVal = startVal, lastLowerVal = startVal;
-            float startX = pricePoints[0].X, lastHigherX = startX, lastLowerX = startX;
-            float lastX = startX, lastVal = startVal;
-            int trendState = 0; // -1 down, 0 unknown, 1 up
-            int innerTrend = 0;
-            for (int i = 1; i < pricePoints.Count; i++)
-            {
-                float lineX = pricePoints[i].X;
-                float lineVal = pricePoints[i].Y;
-                if (lineVal > lastHigherVal)
-                {
-                    lastHigherVal = lineVal;
-                    lastHigherX = lineX;
-                    if (trendState != 1)
-                    {
-                        rtn.Add(new PointF(startX, startVal));
-                        trendState = 1;
-                    }
-                    if (innerTrend == -1)
-                    {
-                        lastLowerVal = lastVal;
-                        lastLowerX = lastX;
-                    }
-                    innerTrend = 0;
-                }
-                else if (lineVal >= lastLowerVal)
-                {
-                    int currentInnerTrend = lineVal > lastVal ? 1 : lineVal < lastVal ? -1 : 0;
-                    if (innerTrend != currentInnerTrend)
-                    {
-                        if (innerTrend != 0 && currentInnerTrend != 0)
-                        {
-                            if (innerTrend == -1)
-                            {
-                                lastLowerX = lastX;
-                                lastLowerVal = lastVal;
-                            }
-                            else if (innerTrend == 1)
-                            {
-                                lastHigherVal = lastVal;
-                                lastHigherX = lastX;
-                            }
-                        }
-                        innerTrend = currentInnerTrend;
-                    }
-                    if (trendState == 1)
-                    {
-                        startVal = lastHigherVal;
-                        startX = lastHigherX;
-                    } 
-                    else if (trendState == -1)
-                    {
-                        startX = lastLowerX;
-                        startVal = lastLowerVal;
-                    }
-                    else
-                    {
-                        startX = lineX;
-                        startVal = lineVal;
-                    }
-                }
-                else
-                {
-                    lastLowerVal = lineVal;
-                    lastLowerX = lineX;
-                    if (trendState != -1)
-                    {
-                        rtn.Add(new PointF(startX, startVal));
-                        trendState = -1;
-                    }
-                    if (innerTrend == 1)
-                    {
-                        lastHigherX = lastX;
-                        lastHigherVal = lastVal;
-                    }
-                    innerTrend = 0;
-                }
-                lastX = lineX;
-                lastVal = lineVal;
-            }
-            rtn.Add(new PointF(lastX, lastVal));
-            return rtn;
-        }
-        private List<PointF> GetTrendZigLinesFromTurningPoints(List<PointF> turningPoints)
+        private static List<PointF> GetTrendZigLinesFromTurningPoints(List<PointF> turningPoints)
         {
             List<PointF> rtn = new();
             PointF startPt = turningPoints[0], lastHighPt = startPt, lastLowPt = startPt, lastPt = startPt;
@@ -512,7 +279,7 @@ namespace RichStrategy
             }
             return rtn;
         }
-        private List<PointF> GetTurningPointsFromPricePoints(List<PointF> pricePoints)
+        private static List<PointF> GetTurningPointsFromPricePoints(List<PointF> pricePoints)
         {
             List<PointF> rtn = new();
             int lastTrend = 2;
@@ -540,7 +307,7 @@ namespace RichStrategy
             }
             return rtn;
         }
-        private double GetLocalDistributionEstimator(double[] data, ref Random rnd)
+        private static double GetLocalDistributionEstimator(double[] data, ref Random rnd)
         {
             double[] diff = new double[data.Length - 1];
             for (int i = 1; i < data.Length; i++)
@@ -586,7 +353,7 @@ namespace RichStrategy
             double rtn = rnd.NextGaussian(0.001 - 0.0001 * index, 0.0001);
             return (rtn + 1) * data[^1];
         }
-        private List<PointF> GetEMAFromPricePoints(List<PointF> data, int MA_Window)
+        private static List<PointF> GetEMAFromPricePoints(List<PointF> data, int MA_Window)
         {
             double ema = data[0].Y;
             double multiplier = 2.0 / (MA_Window + 1.0);

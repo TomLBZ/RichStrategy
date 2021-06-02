@@ -19,11 +19,11 @@ namespace RichStrategy.API
         public static List<string> GetCandleStringsFromGateIO(string key, string secret, 
             TIMEFRAME timeFrame, string settle = "btc", string contract = "BTC_USD", int count = 100)
         {
-            Configuration config = new Configuration();
+            Configuration config = new();
             config.BasePath = "https://api.gateio.ws/api/v4";
             config.ApiV4Key = key;
             config.ApiV4Secret = secret;
-            FuturesApi fa = new FuturesApi(config);
+            FuturesApi fa = new(config);
             List<FuturesCandlestick> candles = fa.ListFuturesCandlesticks(
                 settle, contract, null, null, count, timeFrame.GetDescription());
             List<string> candleJsons = new();

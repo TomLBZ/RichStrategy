@@ -98,11 +98,11 @@ namespace RichStrategy.Strategy
         }
         public bool IsUpTrend()
         {
-            return Trend == 1;
+            return (Value > EMA8 && EMA8 > EMA20 && EMA20 > EMA50) || (Trend == 1 && Value > EMA8 && EMA8 > EMA20);
         }
         public bool IsDownTrend()
         {
-            return Trend == -1;
+            return (Value < EMA8 && EMA8 < EMA20 && EMA20 < EMA50) || (Trend == -1 && Value < EMA8 && EMA8 < EMA20);
         }
     }
     public class CancellableFuturesOrder

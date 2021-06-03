@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using System.Collections.Generic;
+using System.Drawing;
 using Io.Gate.GateApi.Model;
 
 namespace RichStrategy.Strategy
@@ -17,6 +13,7 @@ namespace RichStrategy.Strategy
         private CandleGraphData _OverarchingFrameData;
         private FuturesAccount _FuturesAccount;
         private Position _Position;
+        private List<PointF> _OrderBook;
         private int _Leverage;
         private double _FundAvailable;
         private double _CurrentTokensPosition;
@@ -35,9 +32,10 @@ namespace RichStrategy.Strategy
             _HigherFrameData = higherFrameData;
             _OverarchingFrameData = overarchingFrameData;
             _FuturesAccount = API.GateIO.GetFuturesAccountInfoFromGateIO();
-            _Position = API.GateIO.GetPositionFromGateIO();
+            //_Position = API.GateIO.GetPositionFromGateIO();
+            _OrderBook = API.GateIO.GetOrderBookFromGateIO();
             _FundAvailable = _FuturesAccount.AvailableBalance;
-            _MarketPrice = _Position.MarketPrice; // NO. The trading price is NOT the market price. NEED FIXING URGENTLY
+            _MarketPrice = _OrderBook[10].X; // NO. The trading price is NOT the market price. NEED FIXING URGENTLY
         }
         public void UpdateAction()
         {
@@ -52,7 +50,7 @@ namespace RichStrategy.Strategy
                 }
                 MyFuturesOrders.RemoveAll(o => o.IsPendingGain);
             }
-            if (_TradeFrameData.IsUpTrend() && _LowerFrameData.IsUpTrend())
+            if (_TradeFrameData.IsUpTrend())
             {
                 if (sumOrders > 1000) return;
                 FuturesOrder order = new("BTC_USD", 100, 0, _MarketPrice.ToString(), false, false);
@@ -60,7 +58,7 @@ namespace RichStrategy.Strategy
                 cfo.PlaceOrder(order, _LowerFrameData.ATR14);
                 MyFuturesOrders.Add(cfo);
             }
-            else if (_TradeFrameData.IsDownTrend() && _LowerFrameData.IsDownTrend())
+            else if (_TradeFrameData.IsDownTrend())
             {
                 if (sumOrders > 1000 || -sumOrders > 1000) return;
                 FuturesOrder order = new("BTC_USD", -100, 0, _MarketPrice.ToString(), false, false);

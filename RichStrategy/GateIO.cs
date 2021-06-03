@@ -101,5 +101,6 @@ namespace RichStrategy.API
             string json = Futures.UpdatePositionRiskLimit(settle, contract, newRiskLimit.ToString()).ToJson();
             return new Position(json);
         }
+
     }
 }

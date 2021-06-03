@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Reflection;
+using Io.Gate.GateApi.Model;
 
 namespace RichStrategy.Strategy
 {
@@ -35,7 +36,7 @@ namespace RichStrategy.Strategy
             Type type = enumerationValue.GetType();
             if (!type.IsEnum)
             {
-                throw new ArgumentException("EnumerationValue must be of Enum type", "enumerationValue");
+                throw new ArgumentException("EnumerationValue must be of Enum type", nameof(enumerationValue));
             }
             //Tries to find a DescriptionAttribute for a potential friendly name
             //for the enum
@@ -87,5 +88,111 @@ namespace RichStrategy.Strategy
                 Value.ToString("C"), Estimate.ToString("C"), EMA8.ToString("C"), EMA20.ToString("C"), EMA50.ToString("C"),
                 ATR14.ToString("C"), Volume, RefVolume);
         }
+        public bool IsStrongUpTrend()
+        {
+            return Trend == 1 && EMA8 > EMA20 && EMA20 > EMA50 && Estimate > Value;
+        }
+        public bool IsStrongDownTrend()
+        {
+            return Trend == -1 && EMA8 < EMA20 && EMA20 < EMA50 && Estimate < Value;
+        }
+        public bool IsUpTrend()
+        {
+            return Trend == 1;
+        }
+        public bool IsDownTrend()
+        {
+            return Trend == -1;
+        }
     }
+    public class CancellableFuturesOrder
+    {
+        public FuturesOrder FuturesOrder { get; set; }
+        public int TimeoutTicks { get; set; }
+        public long OrderID { get; set; }
+        public double ReferenceATR { get; set; }
+        public double RewardRiskRatio { get; set; }
+        public long FullfilledTokensAmount { get; set; }
+        public bool IsPendingGain { get; set; }
+        public double Gain { get; set; }
+        private double StartPrice;
+        public CancellableFuturesOrder()
+        {
+            RewardRiskRatio = 1.5;
+            TimeoutTicks = 30;
+            IsPendingGain = false;
+        }
+        public void PlaceOrder(FuturesOrder order, double refATR)
+        {
+            FuturesOrder = order;
+            // place order here.
+            // temp code for testing the overall logic:
+            StartPrice = double.Parse(FuturesOrder.Price);
+            FullfilledTokensAmount = order.Size;
+            ReferenceATR = refATR;
+        }
+        public void Tick(double marketPrice)
+        {
+            if (FullfilledTokensAmount == FuturesOrder.Size)
+            {
+                TimeoutTicks = -1;
+                CheckAgainstATR(marketPrice);
+            }
+            else
+            {
+                if (TimeoutTicks > -1) TimeoutTicks--;
+                if (TimeoutTicks == 0)
+                {
+                    CancelRemainingOrder();
+                    CheckAgainstATR(marketPrice);
+                }
+            }
+            IsPendingGain = TimeoutTicks == -1 && FullfilledTokensAmount == 0;
+        }
+        private void CancelRemainingOrder()
+        {
+            // cancel
+            FuturesOrder.Close = true;
+        }
+        private void CheckAgainstATR(double marketPrice)
+        {
+            double pricediff = marketPrice - StartPrice;
+            if (FullfilledTokensAmount == 0) return;
+            else if (FullfilledTokensAmount < 0) // sell
+            {
+                if (-pricediff > ReferenceATR * RewardRiskRatio)
+                {
+                    // buy back the amount to earn the profit
+                    Gain = ReferenceATR * RewardRiskRatio;
+                    // for debug
+                    FullfilledTokensAmount = 0;
+                }
+                else if (pricediff > ReferenceATR)
+                {
+                    // buy back the amount to stop the loss
+                    Gain = -ReferenceATR;
+                    // for debug
+                    FullfilledTokensAmount = 0;
+                }
+            }
+            else // buy
+            {
+                if (pricediff > ReferenceATR * RewardRiskRatio)
+                {
+                    // sell back the amount to earn the profit
+                    Gain = ReferenceATR * RewardRiskRatio;
+                    // for debug
+                    FullfilledTokensAmount = 0;
+                }
+                else if (-pricediff > ReferenceATR)
+                {
+                    // sell back the amount to stop the loss
+                    Gain = -ReferenceATR;
+                    // for debug
+                    FullfilledTokensAmount = 0;
+                }
+            }
+        }
+    }
+
 }

@@ -47,7 +47,7 @@ namespace RichStrategy
         private List<Candle> _CandleList;
         private readonly Timer _Timer = new();
         private Random _Random = new();
-        private CandleGraphData _ExportData = new();
+        private readonly CandleGraphData _ExportData = new();
         private Action _PeriodicTrigger = null;
         private int _ExportableTrend = 0;
         private double _ExportableEstimateY = 0.0;

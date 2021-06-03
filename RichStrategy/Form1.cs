@@ -53,7 +53,11 @@ namespace RichStrategy
         private void PeriodicTrigger()
         {
             _Strategy.UpdateData(_1MData, _10SData, _5MData, _30MData);
-            if (IsStrategyEnabled) _Strategy.UpdateAction();
+            if (IsStrategyEnabled)
+            {
+                _Strategy.UpdateAction();
+                txtStrategyResult.Text = _Strategy.GetStatus();
+            }
             txtTestOutput.Text = _10SData.ToString() + _1MData.ToString() + _5MData.ToString() + _30MData.ToString();
         }
 
@@ -69,7 +73,6 @@ namespace RichStrategy
                 btnTestStrategy.Text = "Test Strategy";
                 IsStrategyEnabled = false;
             }
-            txtStrategyResult.Text = _Strategy.GetStatus();
         }
     }
 }

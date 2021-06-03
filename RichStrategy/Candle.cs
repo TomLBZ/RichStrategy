@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RichStrategy
 {
@@ -15,7 +12,7 @@ namespace RichStrategy
         public double High { get; set; }
         public double Low { get; set; }
 
-        private string _Json;
+        private readonly string _Json;
 
         public static Candle FromJson(string json)
         {
@@ -34,7 +31,7 @@ namespace RichStrategy
 
         public Candle(string json = "")
         {
-            if (json is null || json == "")
+            if (null == json || json == "")
             {
                 TimestampUnix = -1;
                 Volume = -1;
@@ -47,8 +44,7 @@ namespace RichStrategy
             else
             {
                 _Json = json;
-                string j = json.Replace("\"", "").Replace(",", "").Replace(
-                    ":", "").Replace(" ", "");
+                string j = json.Replace("\"", "").Replace(",", "").Replace(":", "").Replace(" ", "");
                 string[] sep_json = j.Split("\r\n")[1..^1];
                 foreach (string str in sep_json)
                 {

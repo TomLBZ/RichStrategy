@@ -10,17 +10,34 @@ namespace RichStrategy.Strategy
     public class Strategy
     {
         #region Data Properties
-        public int Trend { get; set; }
-        public double ATR14 { get; set; }
-        public double EMA8 { get; set; }
-        public double EMA20 { get; set; }
-        public double EMA50 { get; set; }
-
+        private CandleGraphData _TradeFrameData;
+        private CandleGraphData _LowerFrameData;
+        private CandleGraphData _HigherFrameData;
+        private CandleGraphData _OverarchingFrameData;
+        private int _Leverage;
+        private double _FundAvailable;
+        private double _CurrentTokensPosition;
+        private double _Gain;
         #endregion
-        public Strategy() { }
+        public Strategy(int leverage) 
+        {
+            _Leverage = leverage;
+
+        }
+        public void UpdateData(CandleGraphData tradeFrameData, CandleGraphData lowerFrameData, CandleGraphData higherFrameData, CandleGraphData overarchingFrameData)
+        {
+            _TradeFrameData = tradeFrameData;
+            _LowerFrameData = lowerFrameData;
+            _HigherFrameData = higherFrameData;
+            _OverarchingFrameData = overarchingFrameData;
+        }
         public void UpdateAction()
         { 
 
+        }
+        public string GetStatus()
+        {
+            return API.GateIO.GetFuturesAccountInfoFromGateIO().ToString() + API.GateIO.GetPositionFromGateIO().ToString();
         }
     }
 }

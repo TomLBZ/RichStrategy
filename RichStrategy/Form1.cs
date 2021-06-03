@@ -17,10 +17,12 @@ namespace RichStrategy
         private Strategy.CandleGraphData _1MData;
         private Strategy.CandleGraphData _5MData;
         private Strategy.CandleGraphData _30MData;
+        private bool IsStrategyEnabled = false;
+        private readonly int _TradeLeverage = 10;
         public frmMain()
         {
             InitializeComponent();
-            _Strategy = new();
+            _Strategy = new(_TradeLeverage);
         }
 
         private void frmMain_Load(object sender, EventArgs e)
@@ -30,32 +32,44 @@ namespace RichStrategy
             candleGraph10S.AutoUpdateEnabled = true;
             candleGraph10S.BindData(ref _10SData);
             candleGraph10S.SetPeriodicTrigger(PeriodicTrigger);
-            candleGraph10S.UpdateData();
+            candleGraph10S.UpdateData(true);
             candleGraph1M.TimeFrame = Strategy.TIMEFRAME.TF_1M;
             candleGraph1M.UpdatePeriodSeconds = 6;
             candleGraph1M.AutoUpdateEnabled = true;
             candleGraph1M.BindData(ref _1MData);
-            candleGraph1M.UpdateData();
+            candleGraph1M.UpdateData(true);
             candleGraph5M.TimeFrame = Strategy.TIMEFRAME.TF_5M;
             candleGraph5M.UpdatePeriodSeconds = 30;
             candleGraph5M.AutoUpdateEnabled = true;
             candleGraph5M.BindData(ref _5MData);
-            candleGraph5M.UpdateData();
+            candleGraph5M.UpdateData(true);
             candleGraph30M.TimeFrame = Strategy.TIMEFRAME.TF_30M;
             candleGraph30M.UpdatePeriodSeconds = 90;
             candleGraph30M.AutoUpdateEnabled = true;
             candleGraph30M.BindData(ref _30MData);
-            candleGraph30M.UpdateData();
+            candleGraph30M.UpdateData(true);
         }
 
         private void PeriodicTrigger()
         {
+            _Strategy.UpdateData(_1MData, _10SData, _5MData, _30MData);
+            if (IsStrategyEnabled) _Strategy.UpdateAction();
             txtTestOutput.Text = _10SData.ToString() + _1MData.ToString() + _5MData.ToString() + _30MData.ToString();
         }
 
         private void btnTestStrategy_Click(object sender, EventArgs e)
         {
-            txtStrategyResult.Text = "Start Fund:1000, Trades:10, Leverage:10, Current Position: 200 Tokens, Gain:100, etc...";
+            if (!IsStrategyEnabled)
+            {
+                btnTestStrategy.Text = "Strategy Enabled";
+                IsStrategyEnabled = true;
+            }
+            else
+            {
+                btnTestStrategy.Text = "Test Strategy";
+                IsStrategyEnabled = false;
+            }
+            txtStrategyResult.Text = _Strategy.GetStatus();
         }
     }
 }

@@ -12,7 +12,6 @@ namespace RichStrategy
             M_TIMEDOWN,
             M_CANCEL,
             M_COMPARE,
-            M_COLLECT,
             M_RESOLVED
         }
         public FuturesOrder InnerOrder { get; private set; }
@@ -23,31 +22,31 @@ namespace RichStrategy
         public double TargetPrice { get; private set; }
         public double StopLossPrice { get; private set; }
         public long FullfilledAmount { get; private set; }
-        public bool IsResolved { get; private set; }
         private int Timeout;
         private readonly string Settle;
         private readonly string Contract;
         private readonly double PriceOffset;
-        private double RewardRiskRatio;
+        private readonly double RewardRiskRatio;
         private bool IsBuying = false;
         private bool IsSelling = false;
         private long OrderAmount;
         private long CollectedAmount;
-        private FuturesOrder CollectOrder;
+        private FuturesOrder CollectOrder = null;
         private OrderMode Mode = OrderMode.M_INIT;
-        public TimedFuturesOrder(long tradeAmount, double priceOffset, double startPrice, int timeout, string settle = "btc", string contract = "BTC_USD")
+        public TimedFuturesOrder(long tradeAmount, double priceOffset, double startPrice, int timeout,
+            double rewardToRiskRatio, Candle refCandle, string settle = "btc", string contract = "BTC_USD")
         {
             InnerOrder = new(contract, tradeAmount, 0, startPrice.ToString());
             Timeout = timeout;
             Settle = settle;
             Contract = contract;
             PriceOffset = priceOffset;
-        }
-        public async void PlaceOrder(double refATR, double rewardRiskRatio, Candle refCandle)
-        {
+            RewardRiskRatio = rewardToRiskRatio;
             ReferenceCandle = refCandle;
+        }
+        private async void PlaceOrder(double refATR)
+        {
             ReferenceATR = refATR;
-            RewardRiskRatio = rewardRiskRatio;
             await Task.Factory.StartNew(() =>
             {
                 InnerOrder = API.GateIO.PlaceFuturesOrder(InnerOrder, Settle);
@@ -82,33 +81,67 @@ namespace RichStrategy
                 TargetPrice = double.PositiveInfinity;
             }
         }
+        private void UpdateInnerOrderRoutine(double newATR)
+        {
+            InnerOrder = API.GateIO.GetFuturesOrder(InnerOrder, Settle);
+            UpdateOrderStatus();
+            if (newATR != 0)
+            {
+                ReferenceATR = newATR;
+                UpdatePricePoints();
+            }
+        }
         public void Tick(double marketPrice, double newATR)
         {
             switch (Mode)
             {
                 case OrderMode.M_INIT:
                     {
-
+                        PlaceOrder(newATR);
+                        Mode = OrderMode.M_TIMEDOWN;
                     }
                     break;
                 case OrderMode.M_TIMEDOWN:
                     {
-
+                        UpdateInnerOrderRoutine(newATR);
+                        if (InnerOrder.Status == FuturesOrder.StatusEnum.Finished) Mode = OrderMode.M_COMPARE;
+                        else
+                        {
+                            if (Timeout > 1) Timeout--;
+                            else Mode = OrderMode.M_CANCEL;
+                        }
                     }
                     break;
                 case OrderMode.M_CANCEL:
                     {
-
+                        UpdateInnerOrderRoutine(newATR);
+                        if (InnerOrder.Status == FuturesOrder.StatusEnum.Open)
+                        {
+                            InnerOrder = API.GateIO.CancelFuturesOrder(InnerOrder, Settle);
+                            UpdateOrderStatus();
+                        }
+                        else
+                        {
+                            if (InnerOrder.FinishAs == FuturesOrder.FinishAsEnum.Cancelled)
+                            {
+                                if (FullfilledAmount != CollectedAmount) Mode = OrderMode.M_COMPARE;
+                                else Mode = OrderMode.M_RESOLVED;
+                            }
+                            else Mode = OrderMode.M_COMPARE;
+                        }
                     }
                     break;
                 case OrderMode.M_COMPARE:
                     {
-
-                    }
-                    break;
-                case OrderMode.M_COLLECT:
-                    {
-
+                        UpdateInnerOrderRoutine(newATR);
+                        if (null != CollectOrder)
+                        {
+                            CollectOrder = API.GateIO.GetFuturesOrder(CollectOrder, Settle);
+                            CollectedAmount += Math.Abs(CollectOrder.Size) - Math.Abs(CollectOrder.Left);
+                            TokenizedGain = (marketPrice - StartPrice) * CollectedAmount * Math.Sign(InnerOrder.Size);
+                        }
+                        if (CollectedAmount < FullfilledAmount) CheckAgainstATR(marketPrice);
+                        else Mode = OrderMode.M_RESOLVED;
                     }
                     break;
                 case OrderMode.M_RESOLVED:
@@ -116,31 +149,8 @@ namespace RichStrategy
                 default:
                     break;
             }
-            if (newATR != 0)
-            {
-                ReferenceATR = newATR;
-                UpdatePricePoints();
-            }
-            InnerOrder = API.GateIO.GetFuturesOrder(InnerOrder, Settle);
-            UpdateOrderStatus();
-            if (InnerOrder.Status == FuturesOrder.StatusEnum.Finished)
-            {
-                Timeout = -1;
-                CheckAgainstATR(marketPrice);
-            }
-            else
-            {
-                if (Timeout > 0) Timeout--;
-                if (Timeout == 0)
-                {
-                    InnerOrder = API.GateIO.CancelFuturesOrder(InnerOrder, Settle);
-                    UpdateOrderStatus();
-                }
-            }
-            IsResolved = Timeout == -1 && InnerOrder.Status == FuturesOrder.StatusEnum.Finished
-                && CollectedAmount == FullfilledAmount;
         }
-        private async void CollectBack(long amount, double price, double marketPrice, bool isWinning)
+        private async void CollectBack(long amount, double price)
         {
             if (amount == 0) return;
             await Task.Factory.StartNew(() =>
@@ -148,27 +158,20 @@ namespace RichStrategy
                 CollectOrder = new(Contract, amount, 0, price.ToString(), false, false, FuturesOrder.TifEnum.Ioc);
                 CollectOrder = API.GateIO.PlaceFuturesOrder(CollectOrder, Settle);
             });
-            CollectedAmount += Math.Abs(CollectOrder.Size) - Math.Abs(CollectOrder.Left);
-            double pricediff = Math.Abs(StartPrice - marketPrice);
-            TokenizedGain = pricediff * CollectedAmount * (isWinning ? 1 : -1);
         }
         private void CheckAgainstATR(double marketPrice)
         {
-            if (null != CollectOrder)
-            {
-                CollectedAmount += Math.Abs(CollectOrder.Size) - Math.Abs(CollectOrder.Left);
-            }
             if (IsSelling)
             {
                 if (marketPrice < TargetPrice)
                 {
                     // buy back the amount to earn the profit
-                    CollectBack(FullfilledAmount - CollectedAmount, TargetPrice, marketPrice, true);
+                    CollectBack(FullfilledAmount - CollectedAmount, TargetPrice);
                 }
                 else if (marketPrice > StopLossPrice)
                 {
                     // buy back the amount to stop the loss
-                    CollectBack(FullfilledAmount - CollectedAmount, marketPrice + PriceOffset, marketPrice, false);
+                    CollectBack(FullfilledAmount - CollectedAmount, marketPrice + PriceOffset);
                 }
             }
             else if (IsBuying)
@@ -176,12 +179,12 @@ namespace RichStrategy
                 if (marketPrice > TargetPrice)
                 {
                     // sell back the amount to earn the profit
-                    CollectBack(CollectedAmount - FullfilledAmount, TargetPrice, marketPrice, true);
+                    CollectBack(CollectedAmount - FullfilledAmount, TargetPrice);
                 }
                 else if (marketPrice < StopLossPrice)
                 {
                     // sell back the amount to stop the loss
-                    CollectBack(CollectedAmount - FullfilledAmount, marketPrice - PriceOffset, marketPrice, false);
+                    CollectBack(CollectedAmount - FullfilledAmount, marketPrice - PriceOffset);
                 }
             }
         }
@@ -198,10 +201,13 @@ namespace RichStrategy
                 OrderMode.M_TIMEDOWN => "Counting Down",
                 OrderMode.M_CANCEL => "Cancelling Order",
                 OrderMode.M_COMPARE => "Comparing Prices",
-                OrderMode.M_COLLECT => "Collecting Results",
                 OrderMode.M_RESOLVED => "Finished",
                 _ => "Error",
             };
+        }
+        public bool IsResolved()
+        {
+            return Mode == OrderMode.M_RESOLVED;
         }
     }
 }

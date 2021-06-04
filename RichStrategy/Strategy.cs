@@ -58,32 +58,27 @@ namespace RichStrategy.Strategy
         }
         public void UpdateAction()
         {
-            int ordersCount = MyFuturesOrders.Count;
-            if (ordersCount >= _TradeCount)
+            if(MyFuturesOrders.Count < _TradeCount)
             {
-                foreach (TimedFuturesOrder order in MyFuturesOrders)
+                if ((_TradeFrameData.IsUpTrend() && _LowerFrameData.Trend == 1))// || (_LowerFrameData.IsUpTrend() && _TradeFrameData.Trend == 1))
                 {
-                    order.Tick(_MarketPrice, _LowerFrameData.ATR14);
-                    if (order.IsResolved) _TokenizedGain += order.TokenizedGain;
-                }
-                MyFuturesOrders.RemoveAll(o => o.IsResolved);
-                ordersCount = MyFuturesOrders.Count;
-            }
-            else
-            {
-                if ((_TradeFrameData.IsUpTrend() && _LowerFrameData.Trend == 1) || (_LowerFrameData.IsUpTrend() && _TradeFrameData.Trend == 1))
-                {
-                    TimedFuturesOrder order = new(_TradeAmount, _PriceOrderOffset, _MarketPrice + _PriceOrderOffset, _Timeout, _Settle, _Contract);
-                    order.PlaceOrder(_LowerFrameData.ATR14, _RewardRiskRatio, _LowerFrameData.LastCandle);
+                    TimedFuturesOrder order = new(_TradeAmount, _PriceOrderOffset, _MarketPrice + _PriceOrderOffset, _Timeout,
+                        _RewardRiskRatio, _LowerFrameData.LastCandle, _Settle, _Contract);
                     MyFuturesOrders.Add(order);
                 }
-                else if ((_TradeFrameData.IsDownTrend() && _LowerFrameData.Trend == -1) || (_LowerFrameData.IsDownTrend() && _TradeFrameData.Trend == -1))
+                else if ((_TradeFrameData.IsDownTrend() && _LowerFrameData.Trend == -1))// || (_LowerFrameData.IsDownTrend() && _TradeFrameData.Trend == -1))
                 {
-                    TimedFuturesOrder order = new(-_TradeAmount, _PriceOrderOffset, _MarketPrice - _PriceOrderOffset, _Timeout, _Settle, _Contract);
-                    order.PlaceOrder(_LowerFrameData.ATR14, _RewardRiskRatio, _LowerFrameData.LastCandle);
+                    TimedFuturesOrder order = new(-_TradeAmount, _PriceOrderOffset, _MarketPrice - _PriceOrderOffset, _Timeout,
+                        _RewardRiskRatio, _LowerFrameData.LastCandle, _Settle, _Contract);
                     MyFuturesOrders.Add(order);
                 }
             }
+            foreach (TimedFuturesOrder order in MyFuturesOrders)
+            {
+                order.Tick(_MarketPrice, _LowerFrameData.ATR14);
+                if (order.IsResolved()) _TokenizedGain += order.TokenizedGain;
+            }
+            MyFuturesOrders.RemoveAll(o => o.IsResolved());
         }
         public string GetStatus()
         {

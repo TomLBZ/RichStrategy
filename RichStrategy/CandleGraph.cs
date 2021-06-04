@@ -6,8 +6,6 @@ using System.Drawing;
 using RichStrategy.Strategy;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using MathNet.Numerics.Distributions;
-using MathNet.Numerics.Statistics;
 
 namespace RichStrategy
 {
@@ -508,7 +506,7 @@ namespace RichStrategy
         {
             await Task.Factory.StartNew(() =>
             {
-                _CandleList = API.GateIO.GetCandlesFromGateIO(API.GateIO.Key, API.GateIO.Secret, _TimeFrame, _Settle, _Contract, _DataFrame);
+                _CandleList = API.GateIO.GetCandlesFromGateIO(_TimeFrame, _Settle, _Contract, _DataFrame);
             });
             RangeGraph();
             Redraw();
@@ -541,6 +539,7 @@ namespace RichStrategy
             _ExportData.ATR14 = _ExportableATR14;
             _ExportData.Volume = _ExportableVolume;
             _ExportData.RefVolume = _ExportableRefVolume;
+            _ExportData.LastCandle = _CandleList[^2];
         }
         #endregion
 

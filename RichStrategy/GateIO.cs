@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Diagnostics;
+﻿using System.Collections.Generic;
 using Io.Gate.GateApi.Api;
 using Io.Gate.GateApi.Client;
 using Io.Gate.GateApi.Model;
@@ -20,7 +15,7 @@ namespace RichStrategy.API
         public static readonly string BasePath = "https://api.gateio.ws/api/v4";
         private static readonly Configuration Config = new() { ApiV4Key = Key, ApiV4Secret = Secret, BasePath = BasePath };
         private static readonly FuturesApi Futures = new(Config);
-        public static List<string> GetCandleStringsFromGateIO(string key, string secret, 
+        public static List<string> GetCandleStringsFromGateIO(
             TIMEFRAME timeFrame, string settle = "btc", string contract = "BTC_USD", int count = 100)
         {
             List<FuturesCandlestick> candles = Futures.ListFuturesCandlesticks(
@@ -33,11 +28,10 @@ namespace RichStrategy.API
             return candleJsons;
         }
 
-        public static List<Candle> GetCandlesFromGateIO(string key, string secret,
+        public static List<Candle> GetCandlesFromGateIO(
             TIMEFRAME timeFrame, string settle = "btc", string contract = "BTC_USD", int count = 100)
         {
-            return Candle.FromJsons(GetCandleStringsFromGateIO(
-                key, secret, timeFrame, settle, contract, count));
+            return Candle.FromJsons(GetCandleStringsFromGateIO(timeFrame, settle, contract, count));
         }
 
         public static List<PointF> GetOrderBookFromGateIO(string settle = "btc", string contract = "BTC_USD", 
@@ -100,6 +94,21 @@ namespace RichStrategy.API
         {
             string json = Futures.UpdatePositionRiskLimit(settle, contract, newRiskLimit.ToString()).ToJson();
             return new Position(json);
+        }
+
+        public static FuturesOrder PlaceFuturesOrder(FuturesOrder order, string settle = "btc")
+        {
+            return Futures.CreateFuturesOrder(settle, order);
+        }
+
+        public static FuturesOrder GetFuturesOrder(FuturesOrder order, string settle = "btc")
+        {
+            return Futures.GetFuturesOrder(settle, order.Id.ToString());
+        }
+
+        public static FuturesOrder CancelFuturesOrder(FuturesOrder order, string settle = "btc")
+        {
+            return Futures.CancelFuturesOrder(settle, order.Id.ToString());
         }
 
     }

@@ -267,8 +267,6 @@ namespace RichStrategy
         }
         public void DebugTick(double marketPrice, double newATR)
         {
-            // identicle to Tick but not actually placing orders
-            // get the target-hit : stop-loss ratio and display it
             // if strategy proves to work, change the calculation of fees
             // if strategy does not work, change to a simpler strategy
             switch (Mode)

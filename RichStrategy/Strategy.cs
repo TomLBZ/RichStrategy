@@ -60,7 +60,7 @@ namespace RichStrategy.Strategy
             }
             double tradeAmountMax = _TotalAsset * _TradeFundFactor;
             _TradeAmount = (long)(tradeAmountMax / _TradeCount);
-            _MarketPrice = (_TradeFrameData.MarketBuyPrice + _TradeFrameData.MarketSellPrice) / 2;
+            _MarketPrice = (_LowerFrameData.MarketBuyPrice + _LowerFrameData.MarketSellPrice) / 2;
         }
         public void UpdateAction()
         {

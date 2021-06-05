@@ -17,19 +17,25 @@ namespace RichStrategy
         private readonly Color _ColorLabel = Color.LightBlue;
         private readonly Color _ColorBull = Color.FromArgb(127, Color.Red);
         private readonly Color _ColorBear = Color.FromArgb(127, Color.LimeGreen);
+        private readonly Color _ColorBullLabel = Color.FromArgb(192, Color.Red);
+        private readonly Color _ColorBearLabel = Color.FromArgb(192, Color.LimeGreen);
         private readonly Color _ColorEMA8 = Color.FromArgb(127, Color.LightPink);
         private readonly Color _ColorEMA20 = Color.FromArgb(127, Color.HotPink);
         private readonly Color _ColorEMA50 = Color.FromArgb(127, Color.DeepPink);
         private readonly Color _ColorDistributionEstimator = Color.FromArgb(127, Color.Blue);
         private readonly Color _ColorTrendline = Color.FromArgb(127, Color.DarkKhaki);
         private readonly Color _ColorATR14 = Color.FromArgb(127, Color.Cyan);
+        private readonly Color _ColorATR14Bound = Color.FromArgb(63, Color.Cyan);
         private readonly Color _ColorVolume = Color.FromArgb(127, Color.Orange);
+        private readonly Color _ColorStrategyBuy = Color.FromArgb(225, Color.Red);
+        private readonly Color _ColorStrategySell = Color.FromArgb(225, Color.LimeGreen);
         private TIMEFRAME _TimeFrame = TIMEFRAME.TF_1M;
-        private readonly string _Contract = "BTC_USD";
-        private readonly string _Settle = "btc";
+        private string _Contract = "BTC_USD";
+        private string _Settle = "btc";
         private int _DataFrame = 200;
-        private readonly int _CandleWidth = 10;
         private int _UpdatePeriodSeconds = 10;
+        private int _TrendLevels = 2;
+        private readonly int _CandleWidth = 10;
         private double _MaxPrice = double.NegativeInfinity;
         private double _MinPrice = double.PositiveInfinity;
         private double _MaxY = double.NegativeInfinity;
@@ -56,6 +62,7 @@ namespace RichStrategy
         private double _ExportableVolume = 0.0;
         private double _ExportableRefVolume = 0.0;
         private double _ExportableValue = 0.0;
+        private double _RewardRiskRatio = 1.5;
         private static double _ExportableMarketBuyPrice = 0.0;
         private static double _ExportableMarketSellPrice = 0.0;
         private readonly int _InstanceID = 0;
@@ -69,6 +76,22 @@ namespace RichStrategy
         {
             get { return _TimeFrame; }
             set { _TimeFrame = value; NotifyPropertyChanged(); }
+        }
+        public string Contract {
+            get { return _Contract; }
+            set { _Contract = value; }
+        }
+        public string Settle
+        {
+            get { return _Settle; }
+            set { _Settle = value; }
+        }
+        public int DataFrame
+        {
+            get { return _DataFrame; }
+            set { 
+                if (value >= 100 && value <= 500) _DataFrame = value; 
+            }
         }
         public int UpdatePeriodSeconds 
         {
@@ -93,6 +116,22 @@ namespace RichStrategy
                 }
             }
         }
+        public int TrendLevels
+        {
+            get { return _TrendLevels; }
+            set
+            {
+                if (value >= 1 && value <= 3) _TrendLevels = value;
+            }
+        }
+        public double RewardRiskRatio
+        {
+            get { return _RewardRiskRatio; }
+            set
+            {
+                if (value > 1 && value < 5) _RewardRiskRatio = value;
+            }
+        }
         public event PropertyChangedEventHandler PropertyChanged; 
         private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
         {
@@ -105,6 +144,8 @@ namespace RichStrategy
         {
             if (_CandleList is null || _CandleList.Count == 0) _IsEmptyData = true;
             else _IsEmptyData = false;
+            _MaxPrice = double.NegativeInfinity;
+            _MinPrice = double.PositiveInfinity;
             foreach (Candle candle in _CandleList)
             {
                 _MaxPrice = Math.Max(_MaxPrice, candle.High);
@@ -139,8 +180,13 @@ namespace RichStrategy
                     rectBLY = (float)candle.Open;
                     candleHeight = (float)(candle.Close - candle.Open);
                 }
-                float lineX = rectBLX + (float)(_CandleWidth / 2);
-                g.FillRectangle(new SolidBrush(color), rectBLX, rectBLY, _CandleWidth, candleHeight);
+                float lineX = rectBLX + _CandleWidth / 2f;
+                if (candleHeight == 0)
+                {
+                    color = Color.FromArgb(_ColorBull.A,(_ColorBull.R+_ColorBear.R)/2, (_ColorBull.G + _ColorBear.G) / 2, (_ColorBull.B + _ColorBear.B) / 2);
+                    g.DrawLine(new Pen(color), rectBLX, rectBLY, rectBLX + _CandleWidth, rectBLY);
+                }
+                else g.FillRectangle(new SolidBrush(color), rectBLX, rectBLY, _CandleWidth, candleHeight);
                 g.DrawLine(new Pen(color), lineX, (float)candle.High, lineX, (float)candle.Low);
             }
         }
@@ -148,8 +194,9 @@ namespace RichStrategy
         {
             List<PointF> closePoints = GetClosePricePointsFromCandles();
             _ExportableValue = closePoints[^1].Y;
-            List<PointF> turningClosePoints = GetTurningPointsFromPricePoints(closePoints);
-            List<PointF> turningCloseZigZag = GetTrendZigLinesFromTurningPoints(turningClosePoints);
+            List<PointF> turningCloseZigZag = GetTurningPointsFromPricePoints(closePoints);
+            if (_TrendLevels == 2) turningCloseZigZag = GetTrendZigLinesFromTurningPoints(turningCloseZigZag);
+            if (_TrendLevels == 3) turningCloseZigZag = GetTrendZigLinesFromTurningPoints(turningCloseZigZag);
             g.DrawLines(new Pen(_ColorTrendline), turningCloseZigZag.ToArray());
             PointF last = turningCloseZigZag[^1], last2 = turningCloseZigZag[^2];
             _ExportableTrend = last.Y > last2.Y ? 1 : last.Y < last2.Y ? -1 : 0;
@@ -194,8 +241,22 @@ namespace RichStrategy
                     _ExportableMarketBuyPrice = _OrderBook[10].X;
                 }
             }
+            g.FillRectangle(new SolidBrush(_ColorATR14Bound), 0, (float)(_ExportableMarketBuyPrice - _ExportableATR14),
+                (float)_FrameWidth, (float)(2 * _ExportableATR14 + _ExportableMarketSellPrice - _ExportableMarketBuyPrice));
             g.DrawLine(new Pen(_ColorBull), 0, (float)_ExportableMarketBuyPrice, (float)_FrameWidth, (float)_ExportableMarketBuyPrice);
             g.DrawLine(new Pen(_ColorBear), 0, (float)_ExportableMarketSellPrice, (float)_FrameWidth, (float)_ExportableMarketSellPrice);
+            Candle lastCandle = _CandleList[^2];
+            double buyPrice = _ExportableMarketSellPrice, sellPrice = _ExportableMarketBuyPrice;
+            double stoplossBuy = Math.Min(lastCandle.Low - _ExportableATR14, buyPrice - _ExportableATR14 * _RewardRiskRatio);
+            double stoplossSell = Math.Max(lastCandle.High + _ExportableATR14, sellPrice + _ExportableATR14 * _RewardRiskRatio);
+            double targetBuy = buyPrice + _RewardRiskRatio * (buyPrice - stoplossBuy);
+            double targetSell = sellPrice - _RewardRiskRatio * (stoplossSell - sellPrice);
+            Pen penStrategyBuy = new(_ColorStrategyBuy) { DashStyle = System.Drawing.Drawing2D.DashStyle.Dot };
+            Pen penStrategySell = new(_ColorStrategySell) { DashStyle = System.Drawing.Drawing2D.DashStyle.Dot };
+            g.DrawRectangle(penStrategyBuy, _CandleWidth * _CandleList.Count - _CandleWidth - _CandleWidth - 1,
+                (float)stoplossBuy, _CandleWidth + _CandleWidth, (float)(targetBuy - stoplossBuy));
+            g.DrawRectangle(penStrategySell, _CandleWidth * _CandleList.Count - _CandleWidth - _CandleWidth - 1,
+                (float)targetSell, _CandleWidth + _CandleWidth, (float)(stoplossSell - targetSell));
         }
         private void DrawEmpty()
         {
@@ -228,11 +289,11 @@ namespace RichStrategy
             g.DrawString(strEstimator, DefaultFont, labelBrush, (Width - estimatorStrSize.Width) / 2f, estimatorY - estimatorStrSize.Height / 2f);
             float marketBuyY = (float)((_MaxY - _ExportableMarketBuyPrice) / (_MaxY - _MinY) * Height);
             string strMarketBuy = "Market Buy Price: " + _ExportableMarketBuyPrice.ToString("C");
-            g.DrawString(strMarketBuy, DefaultFont, new SolidBrush(_ColorBull), 0, marketBuyY);
+            g.DrawString(strMarketBuy, DefaultFont, new SolidBrush(_ColorBullLabel), 0, marketBuyY);
             float marketSellY = (float)((_MaxY - _ExportableMarketSellPrice) / (_MaxY - _MinY) * Height);
             string strMarketSell = "Market Sell Price: " + _ExportableMarketSellPrice.ToString("C");
             float strMarketSellHeight = g.MeasureString(strMarketSell, DefaultFont).Height;
-            g.DrawString(strMarketSell, DefaultFont, new SolidBrush(_ColorBear), 0, marketSellY - strMarketSellHeight);
+            g.DrawString(strMarketSell, DefaultFont, new SolidBrush(_ColorBearLabel), 0, marketSellY - strMarketSellHeight);
         }
         private void DrawCross(Graphics g, MouseEventArgs e)
         {
@@ -353,7 +414,7 @@ namespace RichStrategy
             for (int i = 1; i < pricePoints.Count; i++)
             {
                 PointF ptf = pricePoints[i];
-                int trend = ptf.Y > lastPt.Y ? 1 : ptf.Y < lastPt.Y ? -1 : 0;
+                int trend = ptf.Y > lastPt.Y ? 1 : ptf.Y < lastPt.Y ? -1 : lastTrend;// 0;
                 if (trend != lastTrend)
                 {
                     lastTrend = trend;

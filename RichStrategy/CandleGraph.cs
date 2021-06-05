@@ -56,13 +56,19 @@ namespace RichStrategy
         private double _ExportableVolume = 0.0;
         private double _ExportableRefVolume = 0.0;
         private double _ExportableValue = 0.0;
+        private static double _ExportableMarketBuyPrice = 0.0;
+        private static double _ExportableMarketSellPrice = 0.0;
+        private readonly int _InstanceID = 0;
+        private static int _InstanceCount = 0;
+        private static int _LowestTimeFrame = (int)TIMEFRAME.TF_10S;
+        private static readonly List<int> _TimeFrameIDList = new();
         #endregion
 
         #region Properties
         public TIMEFRAME TimeFrame
         {
             get { return _TimeFrame; }
-            set { _TimeFrame = value; }
+            set { _TimeFrame = value; NotifyPropertyChanged(); }
         }
         public int UpdatePeriodSeconds 
         {
@@ -174,6 +180,22 @@ namespace RichStrategy
             refVolume /= Volumes.Count;
             g.DrawLine(new Pen(_ColorVolume), 0, (float)refVolume, (float)_FrameWidth, (float)refVolume);
             _ExportableRefVolume = (refVolume - _MinY) * (_CenterY - _MinY) / 1000.0;
+            if ((int)TimeFrame == _LowestTimeFrame)
+            {
+                int lowestID = _InstanceID;
+                foreach (int id in _TimeFrameIDList)
+                {
+                    if (id < lowestID) lowestID = id;
+                }
+                if (lowestID == _InstanceID)
+                {
+                    List<PointF> _OrderBook = API.GateIO.GetOrderBookFromGateIO();
+                    _ExportableMarketSellPrice = _OrderBook[0].X;
+                    _ExportableMarketBuyPrice = _OrderBook[10].X;
+                }
+            }
+            g.DrawLine(new Pen(_ColorBull), 0, (float)_ExportableMarketBuyPrice, (float)_FrameWidth, (float)_ExportableMarketBuyPrice);
+            g.DrawLine(new Pen(_ColorBear), 0, (float)_ExportableMarketSellPrice, (float)_FrameWidth, (float)_ExportableMarketSellPrice);
         }
         private void DrawEmpty()
         {
@@ -200,6 +222,17 @@ namespace RichStrategy
             string str = "TimeFrame: " + _TimeFrame.GetDescription() + "; DataFrame: " + _DataFrame.ToString() + " samples";
             float strWidth = g.MeasureString(str, DefaultFont).Width;
             g.DrawString(str, DefaultFont, labelBrush, (Width - strWidth) / 2f, 0);
+            float estimatorY = (float)((_MaxY - _ExportableEstimateY) / (_MaxY - _MinY) * Height);
+            string strEstimator ="Estimated Next: " + _ExportableEstimateY.ToString("C");
+            SizeF estimatorStrSize = g.MeasureString(strEstimator, DefaultFont);
+            g.DrawString(strEstimator, DefaultFont, labelBrush, (Width - estimatorStrSize.Width) / 2f, estimatorY - estimatorStrSize.Height / 2f);
+            float marketBuyY = (float)((_MaxY - _ExportableMarketBuyPrice) / (_MaxY - _MinY) * Height);
+            string strMarketBuy = "Market Buy Price: " + _ExportableMarketBuyPrice.ToString("C");
+            g.DrawString(strMarketBuy, DefaultFont, new SolidBrush(_ColorBull), 0, marketBuyY);
+            float marketSellY = (float)((_MaxY - _ExportableMarketSellPrice) / (_MaxY - _MinY) * Height);
+            string strMarketSell = "Market Sell Price: " + _ExportableMarketSellPrice.ToString("C");
+            float strMarketSellHeight = g.MeasureString(strMarketSell, DefaultFont).Height;
+            g.DrawString(strMarketSell, DefaultFont, new SolidBrush(_ColorBear), 0, marketSellY - strMarketSellHeight);
         }
         private void DrawCross(Graphics g, MouseEventArgs e)
         {
@@ -218,33 +251,36 @@ namespace RichStrategy
             g.DrawString(valueY.ToString(), DefaultFont, labelBrush, 0, stryY);
             g.DrawString(strX, DefaultFont, labelBrush,  strxX, Height - strSize.Height);
         }
-        private void Redraw()
+        private async void Redraw()
         {
             if (Width == 0 || Height == 0) return;
             if (_DrawingMutex) return;
             _DrawingMutex = true;
             if (null == Image) Image = new Bitmap(Width, Height);
             if (null == BackgroundImage) BackgroundImage = new Bitmap(Width, Height);
-            if (_IsEmptyData) DrawEmpty();
-            else
+            await Task.Factory.StartNew(() =>
             {
-                using (Graphics g = Graphics.FromImage(BackgroundImage))
+                if (_IsEmptyData) DrawEmpty();
+                else
                 {
-                    g.Clear(_ColorBack);
-                    g.ScaleTransform(Width / (float)_FrameWidth, -Height / (float)_FrameHeight);
-                    g.TranslateTransform(0, -(float)_MaxY);
-                    DrawCandles(g);
-                    DrawTrends(g);
-                    DrawIndicators(g);
+                    using (Graphics g = Graphics.FromImage(BackgroundImage))
+                    {
+                        g.Clear(_ColorBack);
+                        g.ScaleTransform(Width / (float)_FrameWidth, -Height / (float)_FrameHeight);
+                        g.TranslateTransform(0, -(float)_MaxY);
+                        DrawCandles(g);
+                        DrawTrends(g);
+                        DrawIndicators(g);
+                    }
+                    using (Graphics g = Graphics.FromImage(Image))
+                    {
+                        g.Clear(Color.Transparent);
+                        DrawLabels(g);
+                    }
                 }
-                using (Graphics g = Graphics.FromImage(Image))
-                {
-                    g.Clear(Color.Transparent);
-                    DrawLabels(g);
-                }
-            }
+                _DrawingMutex = false;
+            });
             Refresh();
-            _DrawingMutex = false;
         }
         #endregion
 
@@ -496,8 +532,27 @@ namespace RichStrategy
         }
         private void CG_PropertyChanged(object sender, EventArgs e)
         {
-            _Timer.Interval = UpdatePeriodSeconds * 1000;
-            _Timer.Enabled = AutoUpdateEnabled;
+            if (e is PropertyChangedEventArgs args)
+            {
+                string pName = args.PropertyName;
+                if(pName == nameof(TimeFrame))
+                {
+                    _TimeFrameIDList.RemoveAll(i => i == _InstanceID);
+                    if ((int)TimeFrame <= _LowestTimeFrame)
+                    {
+                        _LowestTimeFrame = (int)TimeFrame;
+                        _TimeFrameIDList.Add(_InstanceID);
+                    }
+                }
+                else if (pName == nameof(UpdatePeriodSeconds))
+                {
+                    _Timer.Interval = UpdatePeriodSeconds * 1000;
+                }
+                else if (pName == nameof(AutoUpdateEnabled))
+                {
+                    _Timer.Enabled = AutoUpdateEnabled;
+                }
+            }
         }
         #endregion
 
@@ -540,6 +595,8 @@ namespace RichStrategy
             _ExportData.Volume = _ExportableVolume;
             _ExportData.RefVolume = _ExportableRefVolume;
             _ExportData.LastCandle = _CandleList[^2];
+            _ExportData.MarketBuyPrice = _ExportableMarketBuyPrice;
+            _ExportData.MarketSellPrice = _ExportableMarketSellPrice;
         }
         #endregion
 
@@ -557,6 +614,13 @@ namespace RichStrategy
             AutoUpdateEnabled = false;
             _Timer.Interval = UpdatePeriodSeconds * 1000;
             _Timer.Enabled = AutoUpdateEnabled;
+            _InstanceID = _InstanceCount;
+            _InstanceCount++;
+            if ((int)TimeFrame <= _LowestTimeFrame)
+            {
+                _LowestTimeFrame = (int)TimeFrame;
+                _TimeFrameIDList.Add(_InstanceID);
+            }
             Redraw();
         }
 

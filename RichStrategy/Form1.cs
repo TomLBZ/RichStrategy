@@ -49,12 +49,12 @@ namespace RichStrategy
             {
                 btnTestStrategy.Text = "Strategy Enabled";
                 IsStrategyEnabled = true;
-                _Strategy.InitialBalanceLatch = false;
+                _Strategy.FreshStart();
             }
             else
             {
                 btnTestStrategy.Text = "Test Strategy";
-                IsStrategyEnabled = false;
+                _Strategy.FreshStart();
             }
         }
     }

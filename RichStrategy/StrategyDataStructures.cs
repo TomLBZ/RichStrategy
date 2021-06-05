@@ -65,6 +65,8 @@ namespace RichStrategy.Strategy
         public double ATR14 { get; set; }
         public double Volume { get; set; }
         public double RefVolume { get; set; }
+        public double MarketBuyPrice { get; set; }
+        public double MarketSellPrice { get; set; }
         public Candle LastCandle { get; set; }
         public CandleGraphData()
         {
@@ -84,11 +86,11 @@ namespace RichStrategy.Strategy
         {
             string candleStr = null == LastCandle ? "null" : string.Format("[\r\n    Open:{0},\r\n    Close:{1},\r\n    High:{2},\r\n    Low{3}\r\n  ]",
                 LastCandle.Open.ToString("C"), LastCandle.Close.ToString("C"), LastCandle.High.ToString("C"), LastCandle.Low.ToString("C"));
-            string formatStr = "CandlegraphData: {{\r\n  TimeFrame: {0},\r\n  Trend: {1},\r\n  Value: {2},\r\n  Estimate: {3},\r\n  EMA8: {4},\r\n  " +
-                "EMA20: {5},\r\n  EMA50: {6},\r\n  ATR14: {7},\r\n  Volume: {8:0.##}k,\r\n  RefVolume: {9:0.##}k\r\n  LastCandle: {10}\r\n}}\r\n";
+            string formatStr = "CandlegraphData ({0}): {{\r\n  Trend: {1},\r\n  Value: {2},\r\n  BuyPrice: {3},\r\n  SellPrice: {4},\r\n  Estimate: {5},\r\n  " +
+                "EMA8: {6},\r\n  EMA20: {7},\r\n  EMA50: {8},\r\n  ATR14: {9},\r\n  Volume: {10:0.##}k,\r\n  RefVolume: {11:0.##}k\r\n  LastCandle: {12}\r\n}}\r\n";
             return string.Format(formatStr, TimeFrame.GetDescription(), Trend == 1 ? "Up" : Trend == -1 ? "Down" : "Unknown",
-                Value.ToString("C"), Estimate.ToString("C"), EMA8.ToString("C"), EMA20.ToString("C"), EMA50.ToString("C"),
-                ATR14.ToString("C"), Volume, RefVolume, candleStr);
+                Value.ToString("C"), MarketBuyPrice.ToString("C"), MarketSellPrice.ToString("C"), Estimate.ToString("C"),
+                EMA8.ToString("C"), EMA20.ToString("C"), EMA50.ToString("C"), ATR14.ToString("C"), Volume, RefVolume, candleStr);
         }
         public bool IsUpTrend()
         {

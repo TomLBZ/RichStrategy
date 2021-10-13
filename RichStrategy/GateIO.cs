@@ -9,10 +9,11 @@ namespace RichStrategy.API
 {
     public static class GateIO
     {
-        public static readonly string Key = "82cac15cbe518008df484e9a5ad330b7";
+        // modify here to test with your own API keys.
+        public static readonly string Key = "";
 
-        public static readonly string Secret = "7b92fc112e895d9f509ac8fec4bf392e3acc49065692cd4ba497cb70d71e0880";
-        public static readonly string BasePath = "https://api.gateio.ws/api/v4";
+        public static readonly string Secret = "";
+        public static readonly string BasePath = "";
         private static readonly Configuration Config = new() { ApiV4Key = Key, ApiV4Secret = Secret, BasePath = BasePath };
         private static readonly FuturesApi Futures = new(Config);
         public static List<string> GetCandleStringsFromGateIO(

@@ -13,9 +13,11 @@
 
 ## Notice
 Current Progress:
-![RichStrategy](.img/RS.png)
+
+![RichStrategy](./img/RS.png)
 
 This project branch has been discontinued, and this repo is for recording only.
 
-Newer iteration (ongoing, private, offline development):
+Newer iteration is called Chimatan (ongoing, private, offline development):
+
 ![Chimatan](./img/Chimatan.png)
